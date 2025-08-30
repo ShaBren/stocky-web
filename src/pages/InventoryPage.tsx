@@ -447,9 +447,9 @@ export function InventoryPage() {
                       onChange={handleInputChange}
                       required
                       min="0"
-                      step="0.01"
+                      step="1"
                       className="stocky-input"
-                      placeholder="0.00"
+                      placeholder="0"
                     />
                   </div>
                   <div>

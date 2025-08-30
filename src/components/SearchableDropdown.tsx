@@ -40,7 +40,14 @@ export function SearchableDropdown({
   // Update display value when value prop changes
   useEffect(() => {
     const option = options.find(opt => opt.value === value);
-    setDisplayValue(option ? option.label : String(value || ''));
+    if (option) {
+      setDisplayValue(option.label);
+    } else if (value) {
+      // If value exists but no matching option, display the value itself (for custom values)
+      setDisplayValue(String(value));
+    } else {
+      setDisplayValue('');
+    }
   }, [value, options]);
 
   // Filter options based on search term
