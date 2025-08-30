@@ -176,17 +176,19 @@ export default function ItemsPage() {
             Manage your product catalog and item definitions
           </p>
         </div>
-        <button
-          onClick={() => {
-            resetForm();
-            setEditingItem(null);
-            setShowAddForm(true);
-          }}
-          className="stocky-button-primary flex items-center space-x-2"
-        >
-          <PlusIcon className="h-5 w-5" />
-          <span>Add Item</span>
-        </button>
+        {canCreate && (
+          <button
+            onClick={() => {
+              resetForm();
+              setEditingItem(null);
+              setShowAddForm(true);
+            }}
+            className="stocky-button-primary flex items-center space-x-2"
+          >
+            <PlusIcon className="h-5 w-5" />
+            <span>Add Item</span>
+          </button>
+        )}
       </div>
 
       {/* Search and Filters */}
@@ -220,7 +222,7 @@ export default function ItemsPage() {
       </div>
 
       {/* Add/Edit Form */}
-      {showAddForm && (
+      {showAddForm && ((editingItem && canEdit) || (!editingItem && canCreate)) && (
         <div className="stocky-card p-6">
           <h3 className="text-lg font-medium text-gray-900 mb-4">
             {editingItem ? 'Edit Item' : 'Add New Item'}
@@ -370,19 +372,23 @@ export default function ItemsPage() {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                    <button
-                      onClick={() => handleEdit(item)}
-                      className="text-primary-600 hover:text-primary-900"
-                    >
-                      <PencilIcon className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(item.id)}
-                      disabled={deleteItemMutation.isPending}
-                      className="text-red-600 hover:text-red-900 disabled:opacity-50"
-                    >
-                      <TrashIcon className="h-4 w-4" />
-                    </button>
+                    {canEdit && (
+                      <button
+                        onClick={() => handleEdit(item)}
+                        className="text-primary-600 hover:text-primary-900"
+                      >
+                        <PencilIcon className="h-4 w-4" />
+                      </button>
+                    )}
+                    {canDelete && (
+                      <button
+                        onClick={() => handleDelete(item.id)}
+                        disabled={deleteItemMutation.isPending}
+                        className="text-red-600 hover:text-red-900 disabled:opacity-50"
+                      >
+                        <TrashIcon className="h-4 w-4" />
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}

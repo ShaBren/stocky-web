@@ -4,6 +4,7 @@ import { usersAPI, authAPI } from '../services/api';
 import type { User } from '../types/api';
 import { ErrorDisplay } from '../components/ErrorDisplay';
 import { parseValidationErrors, getGeneralErrorMessage } from '../utils/errorHandling';
+import { canPerformAction } from '../utils/permissions';
 import { usePageTitle } from '../utils/usePageTitle';
 import { 
   PlusIcon, 
@@ -58,6 +59,11 @@ export default function UsersPage() {
 
   // Check if current user is admin
   const isAdmin = currentUser?.role === 'admin';
+
+  // Permission checks (user management typically requires admin)
+  const canCreate = canPerformAction(currentUser?.role, 'create') && isAdmin;
+  const canEdit = canPerformAction(currentUser?.role, 'edit') && isAdmin;
+  const canDelete = canPerformAction(currentUser?.role, 'delete') && isAdmin;
 
   // Mutations
   const createUserMutation = useMutation({

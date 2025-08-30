@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { locationsAPI } from '../services/api';
+import { locationsAPI, authAPI } from '../services/api';
 import type { Location, LocationFilter, StorageType } from '../types/api';
 import { StorageType as StorageTypeEnum } from '../types/api';
 import { ErrorDisplay } from '../components/ErrorDisplay';
 import { parseValidationErrors, getGeneralErrorMessage } from '../utils/errorHandling';
+import { canPerformAction } from '../utils/permissions';
 import { usePageTitle } from '../utils/usePageTitle';
 import { 
   PlusIcon, 
@@ -41,6 +42,18 @@ export default function LocationsPage() {
     queryFn: () => locationsAPI.getLocations(filter),
     retry: 1
   });
+
+  // Get current user for permission checks
+  const { data: currentUser } = useQuery({
+    queryKey: ['auth', 'me'],
+    queryFn: () => authAPI.getCurrentUser(),
+    retry: 1
+  });
+
+  // Permission checks
+  const canCreate = canPerformAction(currentUser?.role, 'create');
+  const canEdit = canPerformAction(currentUser?.role, 'edit');
+  const canDelete = canPerformAction(currentUser?.role, 'delete');
 
   // Mutations
   const createLocationMutation = useMutation({
@@ -167,17 +180,19 @@ export default function LocationsPage() {
             Manage your storage locations and organization
           </p>
         </div>
-        <button
-          onClick={() => {
-            resetForm();
-            setEditingLocation(null);
-            setShowAddForm(true);
-          }}
-          className="stocky-button-primary flex items-center space-x-2"
-        >
-          <PlusIcon className="h-5 w-5" />
-          <span>Add Location</span>
-        </button>
+        {canCreate && (
+          <button
+            onClick={() => {
+              resetForm();
+              setEditingLocation(null);
+              setShowAddForm(true);
+            }}
+            className="stocky-button-primary flex items-center space-x-2"
+          >
+            <PlusIcon className="h-5 w-5" />
+            <span>Add Location</span>
+          </button>
+        )}
       </div>
 
       {/* Search and Filters */}
@@ -211,7 +226,7 @@ export default function LocationsPage() {
       </div>
 
       {/* Add/Edit Form */}
-      {showAddForm && (
+      {showAddForm && ((editingLocation && canEdit) || (!editingLocation && canCreate)) && (
         <div className="stocky-card p-6">
           <h3 className="text-lg font-medium text-gray-900 mb-4">
             {editingLocation ? 'Edit Location' : 'Add New Location'}
@@ -314,19 +329,23 @@ export default function LocationsPage() {
                 </div>
               </div>
               <div className="flex space-x-2">
-                <button
-                  onClick={() => handleEdit(location)}
-                  className="text-primary-600 hover:text-primary-900"
-                >
-                  <PencilIcon className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={() => handleDelete(location.id)}
-                  disabled={deleteLocationMutation.isPending}
-                  className="text-red-600 hover:text-red-900 disabled:opacity-50"
-                >
-                  <TrashIcon className="h-4 w-4" />
-                </button>
+                {canEdit && (
+                  <button
+                    onClick={() => handleEdit(location)}
+                    className="text-primary-600 hover:text-primary-900"
+                  >
+                    <PencilIcon className="h-4 w-4" />
+                  </button>
+                )}
+                {canDelete && (
+                  <button
+                    onClick={() => handleDelete(location.id)}
+                    disabled={deleteLocationMutation.isPending}
+                    className="text-red-600 hover:text-red-900 disabled:opacity-50"
+                  >
+                    <TrashIcon className="h-4 w-4" />
+                  </button>
+                )}
               </div>
             </div>
             
