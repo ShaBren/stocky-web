@@ -8,24 +8,28 @@ import {
 } from '@heroicons/react/24/outline';
 
 export function DashboardPage() {
-  const { data: skusData } = useQuery({
+  const { data: skusData, isLoading: skusLoading, error: skusError } = useQuery({
     queryKey: ['skus', { page: 1, size: 1 }],
-    queryFn: () => skusAPI.getSKUs({ page: 1, size: 1 })
+    queryFn: () => skusAPI.getSKUs({ page: 1, size: 1 }),
+    retry: 1
   });
 
-  const { data: lowStockData } = useQuery({
+  const { data: lowStockData, isLoading: lowStockLoading } = useQuery({
     queryKey: ['skus', { low_stock: true, page: 1, size: 10 }],
-    queryFn: () => skusAPI.getSKUs({ low_stock: true, page: 1, size: 10 })
+    queryFn: () => skusAPI.getSKUs({ low_stock: true, page: 1, size: 10 }),
+    retry: 1
   });
 
-  const { data: alertsData } = useQuery({
+  const { data: alertsData, isLoading: alertsLoading } = useQuery({
     queryKey: ['alerts', { unread_only: true, page: 1, size: 10 }],
-    queryFn: () => alertsAPI.getAlerts(1, 10, true)
+    queryFn: () => alertsAPI.getAlerts(1, 10, true),
+    retry: 1
   });
 
-  const { data: healthData } = useQuery({
+  const { data: healthData, isLoading: healthLoading } = useQuery({
     queryKey: ['health'],
-    queryFn: healthAPI.check
+    queryFn: healthAPI.check,
+    retry: 1
   });
 
   const stats = [
@@ -64,6 +68,14 @@ export function DashboardPage() {
         </p>
       </div>
 
+      {/* Error Display */}
+      {skusError && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+          <p className="font-medium">Unable to load inventory data</p>
+          <p className="text-sm">{skusError.message || 'Please check your connection to the backend'}</p>
+        </div>
+      )}
+
       {/* Stats Grid */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
@@ -90,7 +102,7 @@ export function DashboardPage() {
       </div>
 
       {/* Recent Alerts */}
-      {alertsData && alertsData.items.length > 0 && (
+      {alertsData && alertsData.items && alertsData.items.length > 0 && (
         <div className="stocky-card">
           <div className="px-4 py-5 sm:p-6">
             <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
@@ -119,7 +131,7 @@ export function DashboardPage() {
       )}
 
       {/* Low Stock Items */}
-      {lowStockData && lowStockData.items.length > 0 && (
+      {lowStockData && lowStockData.items && lowStockData.items.length > 0 && (
         <div className="stocky-card">
           <div className="px-4 py-5 sm:p-6">
             <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
