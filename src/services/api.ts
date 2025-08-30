@@ -39,6 +39,11 @@ export const authAPI = {
   getCurrentUser: async (): Promise<User> => {
     const response = await api.get('/auth/me/');
     return response.data;
+  },
+
+  updateProfile: async (userId: number, data: Partial<User & { current_password?: string; new_password?: string }>): Promise<User> => {
+    const response = await api.put(`/users/${userId}/`, data);
+    return response.data;
   }
 };
 

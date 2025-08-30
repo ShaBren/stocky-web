@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { itemsAPI } from '../services/api';
+import { itemsAPI, authAPI } from '../services/api';
 import type { Item, ItemFilter, StorageType } from '../types/api';
 import { StorageType as StorageTypeEnum } from '../types/api';
 import { ErrorDisplay } from '../components/ErrorDisplay';
 import { parseValidationErrors, getGeneralErrorMessage } from '../utils/errorHandling';
+import { canPerformAction } from '../utils/permissions';
 import { 
   PlusIcon, 
   MagnifyingGlassIcon,
@@ -40,6 +41,18 @@ export function ItemsPage() {
     queryFn: () => itemsAPI.getItems(filter),
     retry: 1
   });
+
+  // Get current user for permission checks
+  const { data: currentUser } = useQuery({
+    queryKey: ['auth', 'me'],
+    queryFn: () => authAPI.getCurrentUser(),
+    retry: 1
+  });
+
+  // Permission checks
+  const canCreate = canPerformAction(currentUser?.role, 'create');
+  const canEdit = canPerformAction(currentUser?.role, 'edit');
+  const canDelete = canPerformAction(currentUser?.role, 'delete');
 
   // Mutations
   const createItemMutation = useMutation({

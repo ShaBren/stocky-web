@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { skusAPI, itemsAPI, locationsAPI } from '../services/api';
 import type { SKU, Item } from '../types/api';
-import { StorageType } from '../types/api';
 import { 
   PlusIcon, 
   MinusIcon,

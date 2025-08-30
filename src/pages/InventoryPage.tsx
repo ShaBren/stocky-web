@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { skusAPI, itemsAPI, locationsAPI } from '../services/api';
+import { skusAPI, itemsAPI, locationsAPI, authAPI } from '../services/api';
 import type { SKU, SKUFilter } from '../types/api';
 import { SearchableDropdown } from '../components/SearchableDropdown';
 import { ErrorDisplay } from '../components/ErrorDisplay';
 import { parseValidationErrors, getGeneralErrorMessage } from '../utils/errorHandling';
+import { canPerformAction } from '../utils/permissions';
 import { 
   PlusIcon, 
   MagnifyingGlassIcon,
@@ -17,7 +18,7 @@ import {
 
 export function InventoryPage() {
   const queryClient = useQueryClient();
-  const [filter, setFilter] = useState<SKUFilter>({ page: 1, size: 20 });
+  const [filter] = useState<SKUFilter>({ page: 1, size: 20 });
   const [searchTerm, setSearchTerm] = useState('');
   const [locationFilter, setLocationFilter] = useState<number | undefined>(undefined);
   const [lowStockFilter, setLowStockFilter] = useState(false);
@@ -44,6 +45,13 @@ export function InventoryPage() {
     retry: 1
   });
 
+  // Get current user for permission checks
+  const { data: currentUser } = useQuery({
+    queryKey: ['auth', 'me'],
+    queryFn: () => authAPI.getCurrentUser(),
+    retry: 1
+  });
+
   // Fetch items and locations for dropdowns
   const { data: itemsData } = useQuery({
     queryKey: ['items'],
@@ -56,6 +64,11 @@ export function InventoryPage() {
     queryFn: () => locationsAPI.getLocations(),
     retry: 1
   });
+
+  // Permission checks
+  const canCreate = canPerformAction(currentUser?.role, 'create');
+  const canEdit = canPerformAction(currentUser?.role, 'edit');
+  const canDelete = canPerformAction(currentUser?.role, 'delete');
 
   // Create lookup maps for items and locations
   const itemsMap = new Map(itemsData?.map(item => [item.id, item]) || []);
@@ -329,13 +342,20 @@ export function InventoryPage() {
             Manage your stock quantities and locations
           </p>
         </div>
-        <button
-          onClick={handleAddStart}
-          className="stocky-button-primary flex items-center space-x-2"
-        >
-          <PlusIcon className="h-5 w-5" />
-          <span>Add Inventory</span>
-        </button>
+        {canCreate && (
+          <button
+            onClick={handleAddStart}
+            className="stocky-button-primary flex items-center space-x-2"
+          >
+            <PlusIcon className="h-5 w-5" />
+            <span>Add Inventory</span>
+          </button>
+        )}
+        {!canCreate && (
+          <div className="text-sm text-gray-500 italic">
+            Read-only access
+          </div>
+        )}
       </div>
 
       {/* Search and Filters */}
@@ -453,25 +473,31 @@ export function InventoryPage() {
                     {locationsMap.get(sku.location_id)?.name || 'Unknown Location'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() => handleQuantityUpdate(sku, sku.quantity - 1)}
-                        disabled={sku.quantity <= 0 || updateQuantityMutation.isPending}
-                        className="w-6 h-6 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-sm font-medium disabled:opacity-50"
-                      >
-                        -
-                      </button>
-                      <span className="text-sm font-medium text-gray-900 min-w-[2rem] text-center">
+                    {canEdit ? (
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => handleQuantityUpdate(sku, sku.quantity - 1)}
+                          disabled={sku.quantity <= 0 || updateQuantityMutation.isPending}
+                          className="w-6 h-6 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-sm font-medium disabled:opacity-50"
+                        >
+                          -
+                        </button>
+                        <span className="text-sm font-medium text-gray-900 min-w-[2rem] text-center">
+                          {sku.quantity}
+                        </span>
+                        <button
+                          onClick={() => handleQuantityUpdate(sku, sku.quantity + 1)}
+                          disabled={updateQuantityMutation.isPending}
+                          className="w-6 h-6 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-sm font-medium disabled:opacity-50"
+                        >
+                          +
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="text-sm font-medium text-gray-900">
                         {sku.quantity}
                       </span>
-                      <button
-                        onClick={() => handleQuantityUpdate(sku, sku.quantity + 1)}
-                        disabled={updateQuantityMutation.isPending}
-                        className="w-6 h-6 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-sm font-medium disabled:opacity-50"
-                      >
-                        +
-                      </button>
-                    </div>
+                    )}
                   </td>
                   <td className="stocky-table-cell">
                     {sku.unit}
@@ -481,21 +507,28 @@ export function InventoryPage() {
                   </td>
                   <td className="stocky-table-cell">
                     <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() => handleEditStart(sku)}
-                        className="stocky-icon-button"
-                        title="Edit"
-                      >
-                        <PencilIcon className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(sku.id)}
-                        disabled={deleteSKUMutation.isPending}
-                        className="stocky-icon-button text-red-600 hover:text-red-700 disabled:opacity-50"
-                        title="Delete"
-                      >
-                        <TrashIcon className="h-4 w-4" />
-                      </button>
+                      {canEdit && (
+                        <button
+                          onClick={() => handleEditStart(sku)}
+                          className="stocky-icon-button"
+                          title="Edit"
+                        >
+                          <PencilIcon className="h-4 w-4" />
+                        </button>
+                      )}
+                      {canDelete && (
+                        <button
+                          onClick={() => handleDelete(sku.id)}
+                          disabled={deleteSKUMutation.isPending}
+                          className="stocky-icon-button text-red-600 hover:text-red-700 disabled:opacity-50"
+                          title="Delete"
+                        >
+                          <TrashIcon className="h-4 w-4" />
+                        </button>
+                      )}
+                      {!canEdit && !canDelete && (
+                        <span className="text-xs text-gray-400 italic">Read only</span>
+                      )}
                     </div>
                   </td>
                 </tr>

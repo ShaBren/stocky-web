@@ -8,7 +8,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 export function DashboardPage() {
-  const { data: skusData, isLoading: skusLoading, error: skusError } = useQuery({
+  const { data: skusData, error: skusError } = useQuery({
     queryKey: ['skus'],
     queryFn: () => skusAPI.getSKUs(),
     retry: 1
@@ -20,13 +20,13 @@ export function DashboardPage() {
     return sku.low_stock_threshold != null && sku.quantity <= sku.low_stock_threshold;
   }) || [];
 
-  const { data: alertsData, isLoading: alertsLoading } = useQuery({
+  const { data: alertsData } = useQuery({
     queryKey: ['alerts', { unread_only: true }],
     queryFn: () => alertsAPI.getAlerts(1, 100, true),
     retry: 1
   });
 
-  const { data: healthData, isLoading: healthLoading } = useQuery({
+  const { data: healthData } = useQuery({
     queryKey: ['health'],
     queryFn: healthAPI.check,
     retry: 1
