@@ -33,29 +33,21 @@ export function SearchableDropdown({
 }: SearchableDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [displayValue, setDisplayValue] = useState('');
-  const [justSelected, setJustSelected] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Update display value when value prop changes
-  useEffect(() => {
-    // Don't update display value if we just selected an option
-    if (justSelected) {
-      setJustSelected(false);
-      return;
-    }
-    
+  // Always compute display value from current value and options
+  const getDisplayValue = () => {
     const option = options.find(opt => opt.value === value);
     if (option) {
-      setDisplayValue(option.label);
+      return option.label;
     } else if (value) {
-      // If value exists but no matching option, display the value itself (for custom values)
-      setDisplayValue(String(value));
-    } else {
-      setDisplayValue('');
+      return String(value);
     }
-  }, [value, options, justSelected]);
+    return '';
+  };
+
+  const displayValue = getDisplayValue();
 
   // Filter options based on search term
   const filteredOptions = options.filter(option =>
@@ -78,7 +70,6 @@ export function SearchableDropdown({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     setSearchTerm(newValue);
-    setDisplayValue(newValue);
     
     if (allowCustom && onCustomValue) {
       onCustomValue(newValue);
@@ -90,11 +81,9 @@ export function SearchableDropdown({
   };
 
   const handleOptionSelect = (option: Option) => {
-    setJustSelected(true);
-    setDisplayValue(option.label);
+    onChange(option.value);
     setSearchTerm('');
     setIsOpen(false);
-    onChange(option.value);
   };
 
   const handleInputFocus = () => {
@@ -113,7 +102,6 @@ export function SearchableDropdown({
         handleOptionSelect(filteredOptions[0]);
       } else if (allowCustom && searchTerm && onCustomValue) {
         onCustomValue(searchTerm);
-        setDisplayValue(searchTerm);
         setIsOpen(false);
       }
     }
@@ -170,7 +158,6 @@ export function SearchableDropdown({
                   onClick={() => {
                     if (onCustomValue) {
                       onCustomValue(searchTerm);
-                      setDisplayValue(searchTerm);
                       setIsOpen(false);
                     }
                   }}
