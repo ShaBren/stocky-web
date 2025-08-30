@@ -26,16 +26,20 @@ export function InventoryPage() {
 
   // Fetch items and locations for dropdowns
   const { data: itemsData } = useQuery({
-    queryKey: ['items', { page: 1, size: 100 }],
-    queryFn: () => itemsAPI.getItems({ page: 1, size: 100 }),
+    queryKey: ['items'],
+    queryFn: () => itemsAPI.getItems(),
     retry: 1
   });
 
   const { data: locationsData } = useQuery({
-    queryKey: ['locations', { page: 1, size: 100 }],
-    queryFn: () => locationsAPI.getLocations({ page: 1, size: 100 }),
+    queryKey: ['locations'],
+    queryFn: () => locationsAPI.getLocations(),
     retry: 1
   });
+
+  // Create lookup maps for items and locations
+  const itemsMap = new Map(itemsData?.map(item => [item.id, item]) || []);
+  const locationsMap = new Map(locationsData?.map(location => [location.id, location]) || []);
 
   // Mutations
   const updateQuantityMutation = useMutation({
@@ -114,13 +118,13 @@ export function InventoryPage() {
       <div className="stocky-card p-4">
         <div className="flex items-center space-x-4">
           <div className="flex-1 relative">
-            <MagnifyingGlassIcon className="h-5 w-5 absolute left-3 top-3 text-gray-400" />
+            <MagnifyingGlassIcon className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <input
               type="text"
               placeholder="Search items..."
               value={searchTerm}
               onChange={(e) => handleSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              className="stocky-search-input"
             />
           </div>
           <select
@@ -153,30 +157,30 @@ export function InventoryPage() {
       {/* Inventory Table */}
       <div className="stocky-card overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="stocky-table">
+            <thead className="stocky-table-header">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="stocky-table-header-cell">
                   Item
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="stocky-table-header-cell">
                   Location
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="stocky-table-header-cell">
                   Quantity
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="stocky-table-header-cell">
                   Unit
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="stocky-table-header-cell">
                   Expiry Date
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="stocky-table-header-cell">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="stocky-table-body">
               {skusData?.map((sku) => (
                 <tr key={sku.id} className={isLowStock(sku) ? 'bg-yellow-50' : ''}>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -186,16 +190,16 @@ export function InventoryPage() {
                       )}
                       <div>
                         <div className="text-sm font-medium text-gray-900">
-                          {sku.item?.name || 'Unknown Item'}
+                          {itemsMap.get(sku.item_id)?.name || 'Unknown Item'}
                         </div>
                         <div className="text-sm text-gray-500">
-                          {sku.item?.description}
+                          {itemsMap.get(sku.item_id)?.description || ''}
                         </div>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {sku.location?.name || 'Unknown Location'}
+                    {locationsMap.get(sku.location_id)?.name || 'Unknown Location'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center space-x-2">
@@ -218,26 +222,30 @@ export function InventoryPage() {
                       </button>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="stocky-table-cell">
                     {sku.unit}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="stocky-table-cell">
                     {sku.expiry_date ? new Date(sku.expiry_date).toLocaleDateString() : '-'}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                    <button
-                      onClick={() => setEditingSku(sku)}
-                      className="text-primary-600 hover:text-primary-900"
-                    >
-                      <PencilIcon className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(sku.id)}
-                      disabled={deleteSKUMutation.isPending}
-                      className="text-red-600 hover:text-red-900 disabled:opacity-50"
-                    >
-                      <TrashIcon className="h-4 w-4" />
-                    </button>
+                  <td className="stocky-table-cell">
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => setEditingSku(sku)}
+                        className="stocky-icon-button"
+                        title="Edit"
+                      >
+                        <PencilIcon className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(sku.id)}
+                        disabled={deleteSKUMutation.isPending}
+                        className="stocky-icon-button text-red-600 hover:text-red-700 disabled:opacity-50"
+                        title="Delete"
+                      >
+                        <TrashIcon className="h-4 w-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
