@@ -271,7 +271,7 @@ export function LocationsPage() {
 
       {/* Locations Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {locationsData?.items?.map((location) => (
+        {locationsData?.map((location) => (
           <div key={location.id} className="stocky-card p-6">
             <div className="flex items-start justify-between">
               <div className="flex items-center space-x-3">
@@ -327,33 +327,8 @@ export function LocationsPage() {
         ))}
       </div>
 
-      {/* Pagination */}
-      {locationsData && locationsData.pages > 1 && (
-        <div className="stocky-card p-4">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => setFilter({ ...filter, page: Math.max(1, filter.page! - 1) })}
-              disabled={filter.page === 1}
-              className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
-            >
-              Previous
-            </button>
-            <span className="text-sm text-gray-700">
-              Page {filter.page} of {locationsData.pages} ({locationsData.total} total locations)
-            </span>
-            <button
-              onClick={() => setFilter({ ...filter, page: Math.min(locationsData.pages, filter.page! + 1) })}
-              disabled={filter.page === locationsData.pages}
-              className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
-            >
-              Next
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Empty State */}
-      {locationsData?.items?.length === 0 && (
+      {locationsData?.length === 0 && (
         <div className="text-center py-12">
           <MapPinIcon className="mx-auto h-12 w-12 text-gray-400" />
           <p className="text-gray-500 text-lg mt-4">No locations found</p>

@@ -9,20 +9,20 @@ import {
 
 export function DashboardPage() {
   const { data: skusData, isLoading: skusLoading, error: skusError } = useQuery({
-    queryKey: ['skus', { page: 1, size: 1 }],
-    queryFn: () => skusAPI.getSKUs({ page: 1, size: 1 }),
+    queryKey: ['skus'],
+    queryFn: () => skusAPI.getSKUs(),
     retry: 1
   });
 
   const { data: lowStockData, isLoading: lowStockLoading } = useQuery({
-    queryKey: ['skus', { low_stock: true, page: 1, size: 10 }],
-    queryFn: () => skusAPI.getSKUs({ low_stock: true, page: 1, size: 10 }),
+    queryKey: ['skus', { low_stock: true }],
+    queryFn: () => skusAPI.getSKUs({ low_stock: true }),
     retry: 1
   });
 
   const { data: alertsData, isLoading: alertsLoading } = useQuery({
-    queryKey: ['alerts', { unread_only: true, page: 1, size: 10 }],
-    queryFn: () => alertsAPI.getAlerts(1, 10, true),
+    queryKey: ['alerts', { unread_only: true }],
+    queryFn: () => alertsAPI.getAlerts(1, 100, true),
     retry: 1
   });
 
@@ -35,19 +35,19 @@ export function DashboardPage() {
   const stats = [
     {
       name: 'Total Items in Inventory',
-      value: skusData?.total || 0,
+      value: skusData?.length || 0,
       icon: CubeIcon,
       color: 'bg-blue-500'
     },
     {
       name: 'Low Stock Items',
-      value: lowStockData?.total || 0,
+      value: lowStockData?.length || 0,
       icon: ExclamationTriangleIcon,
       color: 'bg-yellow-500'
     },
     {
       name: 'Unread Alerts',
-      value: alertsData?.total || 0,
+      value: alertsData?.length || 0,
       icon: ClockIcon,
       color: 'bg-red-500'
     },
@@ -102,14 +102,14 @@ export function DashboardPage() {
       </div>
 
       {/* Recent Alerts */}
-      {alertsData && alertsData.items && alertsData.items.length > 0 && (
+      {alertsData && alertsData.length > 0 && (
         <div className="stocky-card">
           <div className="px-4 py-5 sm:p-6">
             <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
               Recent Alerts
             </h3>
             <div className="space-y-3">
-              {alertsData.items.slice(0, 5).map((alert) => (
+              {alertsData.slice(0, 5).map((alert) => (
                 <div key={alert.id} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-md">
                   <ExclamationTriangleIcon className="h-5 w-5 text-yellow-500 mt-0.5" />
                   <div className="flex-1 min-w-0">
@@ -131,14 +131,14 @@ export function DashboardPage() {
       )}
 
       {/* Low Stock Items */}
-      {lowStockData && lowStockData.items && lowStockData.items.length > 0 && (
+      {lowStockData && lowStockData.length > 0 && (
         <div className="stocky-card">
           <div className="px-4 py-5 sm:p-6">
             <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
               Low Stock Items
             </h3>
             <div className="space-y-3">
-              {lowStockData.items.slice(0, 5).map((sku) => (
+              {lowStockData.slice(0, 5).map((sku) => (
                 <div key={sku.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
                   <div className="flex-1">
                     <p className="text-sm font-medium text-gray-900">

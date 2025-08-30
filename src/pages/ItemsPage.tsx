@@ -301,7 +301,7 @@ export function ItemsPage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {itemsData?.items?.map((item) => (
+              {itemsData?.map((item) => (
                 <tr key={item.id}>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div>
@@ -348,35 +348,10 @@ export function ItemsPage() {
             </tbody>
           </table>
         </div>
-
-        {/* Pagination */}
-        {itemsData && itemsData.pages > 1 && (
-          <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200">
-            <div className="flex-1 flex justify-between">
-              <button
-                onClick={() => setFilter({ ...filter, page: Math.max(1, filter.page! - 1) })}
-                disabled={filter.page === 1}
-                className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
-              >
-                Previous
-              </button>
-              <span className="text-sm text-gray-700">
-                Page {filter.page} of {itemsData.pages} ({itemsData.total} total items)
-              </span>
-              <button
-                onClick={() => setFilter({ ...filter, page: Math.min(itemsData.pages, filter.page! + 1) })}
-                disabled={filter.page === itemsData.pages}
-                className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
-              >
-                Next
-              </button>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Empty State */}
-      {itemsData?.items?.length === 0 && (
+      {itemsData?.length === 0 && (
         <div className="text-center py-12">
           <p className="text-gray-500 text-lg">No items found</p>
           <p className="text-gray-400 text-sm mt-2">

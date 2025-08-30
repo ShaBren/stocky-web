@@ -129,7 +129,7 @@ export function InventoryPage() {
             className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
           >
             <option value="">All Locations</option>
-            {locationsData?.items?.map((location) => (
+            {locationsData?.map((location) => (
               <option key={location.id} value={location.id}>
                 {location.name}
               </option>
@@ -177,7 +177,7 @@ export function InventoryPage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {skusData?.items?.map((sku) => (
+              {skusData?.map((sku) => (
                 <tr key={sku.id} className={isLowStock(sku) ? 'bg-yellow-50' : ''}>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
@@ -244,35 +244,10 @@ export function InventoryPage() {
             </tbody>
           </table>
         </div>
-
-        {/* Pagination */}
-        {skusData && skusData.pages > 1 && (
-          <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200">
-            <div className="flex-1 flex justify-between">
-              <button
-                onClick={() => setFilter({ ...filter, page: Math.max(1, filter.page! - 1) })}
-                disabled={filter.page === 1}
-                className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
-              >
-                Previous
-              </button>
-              <span className="text-sm text-gray-700">
-                Page {filter.page} of {skusData.pages} ({skusData.total} total items)
-              </span>
-              <button
-                onClick={() => setFilter({ ...filter, page: Math.min(skusData.pages, filter.page! + 1) })}
-                disabled={filter.page === skusData.pages}
-                className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
-              >
-                Next
-              </button>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Empty State */}
-      {skusData?.items?.length === 0 && (
+      {skusData?.length === 0 && (
         <div className="text-center py-12">
           <p className="text-gray-500 text-lg">No inventory items found</p>
           <p className="text-gray-400 text-sm mt-2">

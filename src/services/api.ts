@@ -66,7 +66,7 @@ export const usersAPI = {
 
 // Items API
 export const itemsAPI = {
-  getItems: async (filter: ItemFilter = {}): Promise<PaginatedResponse<Item>> => {
+  getItems: async (filter: ItemFilter = {}): Promise<Item[]> => {
     const response = await api.get('/items', { params: filter });
     return response.data;
   },
@@ -105,7 +105,7 @@ export const itemsAPI = {
 
 // Locations API
 export const locationsAPI = {
-  getLocations: async (filter: LocationFilter = {}): Promise<PaginatedResponse<Location>> => {
+  getLocations: async (filter: LocationFilter = {}): Promise<Location[]> => {
     const response = await api.get('/locations', { params: filter });
     return response.data;
   },
@@ -132,7 +132,7 @@ export const locationsAPI = {
 
 // SKUs (Inventory) API
 export const skusAPI = {
-  getSKUs: async (filter: SKUFilter = {}): Promise<PaginatedResponse<SKU>> => {
+  getSKUs: async (filter: SKUFilter = {}): Promise<SKU[]> => {
     const response = await api.get('/skus', { params: filter });
     return response.data;
   },
@@ -164,7 +164,7 @@ export const skusAPI = {
 
 // Alerts API
 export const alertsAPI = {
-  getAlerts: async (page = 1, size = 20, unread_only = false): Promise<PaginatedResponse<Alert>> => {
+  getAlerts: async (page = 1, size = 20, unread_only = false): Promise<Alert[]> => {
     const response = await api.get('/alerts', { params: { page, size, unread_only } });
     return response.data;
   },
