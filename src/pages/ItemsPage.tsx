@@ -53,6 +53,7 @@ export function ItemsPage() {
       itemsAPI.updateItem(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['items'] });
+      setShowAddForm(false);
       setEditingItem(null);
       resetForm();
     }

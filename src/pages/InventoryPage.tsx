@@ -164,18 +164,22 @@ export function InventoryPage() {
     mutationFn: ({ id, data }: { id: number; data: Partial<SKU> }) => skusAPI.updateSKU(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['skus'] });
+      // Close modal first, then reset state
       setShowAddForm(false);
-      setIsEditMode(false);
-      setEditingSku(null);
-      setFormData({
-        item_id: '',
-        location_id: '',
-        quantity: '',
-        unit: '',
-        expiry_date: '',
-        low_stock_threshold: '',
-        notes: ''
-      });
+      // Reset state after modal is closed
+      setTimeout(() => {
+        setIsEditMode(false);
+        setEditingSku(null);
+        setFormData({
+          item_id: '',
+          location_id: '',
+          quantity: '',
+          unit: '',
+          expiry_date: '',
+          low_stock_threshold: '',
+          notes: ''
+        });
+      }, 0);
     }
   });
 
