@@ -116,8 +116,8 @@ export function InventoryPage() {
 
       {/* Search and Filters */}
       <div className="stocky-card p-4">
-        <div className="flex items-center space-x-4">
-          <div className="flex-1 relative">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+          <div className="md:col-span-6 relative">
             <MagnifyingGlassIcon className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <input
               type="text"
@@ -127,19 +127,21 @@ export function InventoryPage() {
               className="stocky-search-input"
             />
           </div>
-          <select
-            value={filter.location_id || ''}
-            onChange={(e) => setFilter({ ...filter, location_id: e.target.value ? Number(e.target.value) : undefined, page: 1 })}
-            className="stocky-input"
-          >
-            <option value="">All Locations</option>
-            {locationsData?.map((location) => (
-              <option key={location.id} value={location.id}>
-                {location.name}
-              </option>
-            ))}
-          </select>
-          <div className="flex items-center space-x-2">
+          <div className="md:col-span-3">
+            <select
+              value={filter.location_id || ''}
+              onChange={(e) => setFilter({ ...filter, location_id: e.target.value ? Number(e.target.value) : undefined, page: 1 })}
+              className="stocky-input"
+            >
+              <option value="">All Locations</option>
+              {locationsData?.map((location) => (
+                <option key={location.id} value={location.id}>
+                  {location.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="md:col-span-3 flex items-center space-x-2">
             <input
               type="checkbox"
               id="lowStock"
@@ -263,6 +265,132 @@ export function InventoryPage() {
               ? 'Try adjusting your filters'
               : 'Add your first inventory item to get started'}
           </p>
+        </div>
+      )}
+
+      {/* Add Inventory Form */}
+      {showAddForm && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">
+                Add Inventory Item
+              </h3>
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                // TODO: Implement form submission
+                setShowAddForm(false);
+              }}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="item_id" className="stocky-label">
+                      Item *
+                    </label>
+                    <select
+                      id="item_id"
+                      required
+                      className="stocky-input"
+                    >
+                      <option value="">Select an item</option>
+                      {itemsData?.map(item => (
+                        <option key={item.id} value={item.id}>{item.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label htmlFor="location_id" className="stocky-label">
+                      Location *
+                    </label>
+                    <select
+                      id="location_id"
+                      required
+                      className="stocky-input"
+                    >
+                      <option value="">Select a location</option>
+                      {locationsData?.map(location => (
+                        <option key={location.id} value={location.id}>{location.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label htmlFor="quantity" className="stocky-label">
+                      Quantity *
+                    </label>
+                    <input
+                      type="number"
+                      id="quantity"
+                      required
+                      min="0"
+                      step="0.01"
+                      className="stocky-input"
+                      placeholder="0.00"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="unit" className="stocky-label">
+                      Unit *
+                    </label>
+                    <input
+                      type="text"
+                      id="unit"
+                      required
+                      className="stocky-input"
+                      placeholder="e.g. pieces, kg, litres"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="expiry_date" className="stocky-label">
+                      Expiry Date
+                    </label>
+                    <input
+                      type="date"
+                      id="expiry_date"
+                      className="stocky-input"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="low_stock_threshold" className="stocky-label">
+                      Low Stock Threshold
+                    </label>
+                    <input
+                      type="number"
+                      id="low_stock_threshold"
+                      min="0"
+                      step="0.01"
+                      className="stocky-input"
+                      placeholder="0.00"
+                    />
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <label htmlFor="notes" className="stocky-label">
+                    Notes
+                  </label>
+                  <textarea
+                    id="notes"
+                    rows={3}
+                    className="stocky-input"
+                    placeholder="Additional notes about this inventory item..."
+                  />
+                </div>
+                <div className="flex justify-end space-x-3 mt-6">
+                  <button
+                    type="button"
+                    onClick={() => setShowAddForm(false)}
+                    className="stocky-button-secondary"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="stocky-button-primary"
+                  >
+                    Add Inventory
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
         </div>
       )}
     </div>

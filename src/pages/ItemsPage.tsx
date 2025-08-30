@@ -156,8 +156,8 @@ export function ItemsPage() {
 
       {/* Search and Filters */}
       <div className="stocky-card p-4">
-        <div className="flex items-center space-x-4">
-          <div className="flex-1 relative">
+        <div className="grid grid-cols-1 md:grid-cols-8 gap-4">
+          <div className="md:col-span-5 relative">
             <MagnifyingGlassIcon className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <input
               type="text"
@@ -167,18 +167,20 @@ export function ItemsPage() {
               className="stocky-search-input"
             />
           </div>
-          <select
-            value={filter.storage_type || ''}
-            onChange={(e) => setFilter({ ...filter, storage_type: e.target.value as StorageType || undefined, page: 1 })}
-            className="stocky-input"
-          >
-            <option value="">All Storage Types</option>
-            {Object.entries(storageTypeLabels).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
+          <div className="md:col-span-3">
+            <select
+              value={filter.storage_type || ''}
+              onChange={(e) => setFilter({ ...filter, storage_type: e.target.value as StorageType || undefined, page: 1 })}
+              className="stocky-input"
+            >
+              <option value="">All Storage Types</option>
+              {Object.entries(storageTypeLabels).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
