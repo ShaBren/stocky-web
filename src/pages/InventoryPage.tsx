@@ -16,6 +16,15 @@ export function InventoryPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingSku, setEditingSku] = useState<SKU | null>(null);
+  const [formData, setFormData] = useState({
+    item_id: '',
+    location_id: '',
+    quantity: '',
+    unit: '',
+    expiry_date: '',
+    low_stock_threshold: '',
+    notes: ''
+  });
 
   // Fetch inventory data
   const { data: skusData, isLoading: skusLoading, error: skusError } = useQuery({
@@ -57,6 +66,23 @@ export function InventoryPage() {
     }
   });
 
+  const createSKUMutation = useMutation({
+    mutationFn: (data: any) => skusAPI.createSKU(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['skus'] });
+      setShowAddForm(false);
+      setFormData({
+        item_id: '',
+        location_id: '',
+        quantity: '',
+        unit: '',
+        expiry_date: '',
+        low_stock_threshold: '',
+        notes: ''
+      });
+    }
+  });
+
   const handleSearch = (term: string) => {
     setSearchTerm(term);
     setFilter({ ...filter, search: term, page: 1 });
@@ -72,6 +98,30 @@ export function InventoryPage() {
     if (confirm('Are you sure you want to delete this inventory item?')) {
       deleteSKUMutation.mutate(id);
     }
+  };
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const submitData = {
+      item_id: Number(formData.item_id),
+      location_id: Number(formData.location_id),
+      quantity: Number(formData.quantity),
+      unit: formData.unit,
+      expiry_date: formData.expiry_date || null,
+      low_stock_threshold: formData.low_stock_threshold ? Number(formData.low_stock_threshold) : null,
+      notes: formData.notes || null
+    };
+
+    createSKUMutation.mutate(submitData);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   const isLowStock = (sku: SKU) => {
@@ -276,11 +326,7 @@ export function InventoryPage() {
               <h3 className="text-lg font-medium text-gray-900 mb-4">
                 Add Inventory Item
               </h3>
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                // TODO: Implement form submission
-                setShowAddForm(false);
-              }}>
+              <form onSubmit={handleFormSubmit}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label htmlFor="item_id" className="stocky-label">
@@ -288,6 +334,9 @@ export function InventoryPage() {
                     </label>
                     <select
                       id="item_id"
+                      name="item_id"
+                      value={formData.item_id}
+                      onChange={handleInputChange}
                       required
                       className="stocky-input"
                     >
@@ -303,6 +352,9 @@ export function InventoryPage() {
                     </label>
                     <select
                       id="location_id"
+                      name="location_id"
+                      value={formData.location_id}
+                      onChange={handleInputChange}
                       required
                       className="stocky-input"
                     >
@@ -319,6 +371,9 @@ export function InventoryPage() {
                     <input
                       type="number"
                       id="quantity"
+                      name="quantity"
+                      value={formData.quantity}
+                      onChange={handleInputChange}
                       required
                       min="0"
                       step="0.01"
@@ -333,6 +388,9 @@ export function InventoryPage() {
                     <input
                       type="text"
                       id="unit"
+                      name="unit"
+                      value={formData.unit}
+                      onChange={handleInputChange}
                       required
                       className="stocky-input"
                       placeholder="e.g. pieces, kg, litres"
@@ -345,6 +403,9 @@ export function InventoryPage() {
                     <input
                       type="date"
                       id="expiry_date"
+                      name="expiry_date"
+                      value={formData.expiry_date}
+                      onChange={handleInputChange}
                       className="stocky-input"
                     />
                   </div>
@@ -355,6 +416,9 @@ export function InventoryPage() {
                     <input
                       type="number"
                       id="low_stock_threshold"
+                      name="low_stock_threshold"
+                      value={formData.low_stock_threshold}
+                      onChange={handleInputChange}
                       min="0"
                       step="0.01"
                       className="stocky-input"
@@ -368,6 +432,9 @@ export function InventoryPage() {
                   </label>
                   <textarea
                     id="notes"
+                    name="notes"
+                    value={formData.notes}
+                    onChange={handleInputChange}
                     rows={3}
                     className="stocky-input"
                     placeholder="Additional notes about this inventory item..."
@@ -378,14 +445,16 @@ export function InventoryPage() {
                     type="button"
                     onClick={() => setShowAddForm(false)}
                     className="stocky-button-secondary"
+                    disabled={createSKUMutation.isPending}
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     className="stocky-button-primary"
+                    disabled={createSKUMutation.isPending}
                   >
-                    Add Inventory
+                    {createSKUMutation.isPending ? 'Adding...' : 'Add Inventory'}
                   </button>
                 </div>
               </form>
