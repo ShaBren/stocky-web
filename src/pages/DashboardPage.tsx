@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { skusAPI, alertsAPI, healthAPI } from '../services/api';
+import { skusAPI, alertsAPI, healthAPI, itemsAPI, locationsAPI } from '../services/api';
 import { 
   CubeIcon, 
   ExclamationTriangleIcon, 
@@ -31,6 +31,23 @@ export function DashboardPage() {
     queryFn: healthAPI.check,
     retry: 1
   });
+
+  // Fetch items and locations for lookup
+  const { data: itemsData } = useQuery({
+    queryKey: ['items'],
+    queryFn: () => itemsAPI.getItems(),
+    retry: 1
+  });
+
+  const { data: locationsData } = useQuery({
+    queryKey: ['locations'],
+    queryFn: () => locationsAPI.getLocations(),
+    retry: 1
+  });
+
+  // Create lookup maps
+  const itemsMap = new Map(itemsData?.map(item => [item.id, item]) || []);
+  const locationsMap = new Map(locationsData?.map(location => [location.id, location]) || []);
 
   const stats = [
     {
@@ -142,10 +159,10 @@ export function DashboardPage() {
                 <div key={sku.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
                   <div className="flex-1">
                     <p className="text-sm font-medium text-gray-900">
-                      {sku.item?.name || 'Unknown Item'}
+                      {itemsMap.get(sku.item_id)?.name || 'Unknown Item'}
                     </p>
                     <p className="text-sm text-gray-500">
-                      {sku.location?.name || 'Unknown Location'}
+                      {locationsMap.get(sku.location_id)?.name || 'Unknown Location'}
                     </p>
                   </div>
                   <div className="text-right">
