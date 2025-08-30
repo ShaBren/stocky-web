@@ -34,11 +34,18 @@ export function SearchableDropdown({
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [displayValue, setDisplayValue] = useState('');
+  const [justSelected, setJustSelected] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Update display value when value prop changes
   useEffect(() => {
+    // Don't update display value if we just selected an option
+    if (justSelected) {
+      setJustSelected(false);
+      return;
+    }
+    
     const option = options.find(opt => opt.value === value);
     if (option) {
       setDisplayValue(option.label);
@@ -48,7 +55,7 @@ export function SearchableDropdown({
     } else {
       setDisplayValue('');
     }
-  }, [value, options]);
+  }, [value, options, justSelected]);
 
   // Filter options based on search term
   const filteredOptions = options.filter(option =>
@@ -83,10 +90,11 @@ export function SearchableDropdown({
   };
 
   const handleOptionSelect = (option: Option) => {
-    onChange(option.value);
+    setJustSelected(true);
     setDisplayValue(option.label);
     setSearchTerm('');
     setIsOpen(false);
+    onChange(option.value);
   };
 
   const handleInputFocus = () => {
