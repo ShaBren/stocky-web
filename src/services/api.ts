@@ -156,8 +156,8 @@ export const skusAPI = {
     await api.delete(`/skus/${id}`);
   },
 
-  updateQuantity: async (id: number, quantity: number, notes?: string): Promise<SKU> => {
-    const response = await api.patch(`/skus/${id}/quantity`, { quantity, notes });
+  updateQuantity: async (id: number, quantity: number): Promise<SKU> => {
+    const response = await api.put(`/skus/${id}/quantity`, { quantity });
     return response.data;
   }
 };
