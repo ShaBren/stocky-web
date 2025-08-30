@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { skusAPI, itemsAPI, locationsAPI } from '../services/api';
 import type { SKU, SKUFilter } from '../types/api';
@@ -17,6 +17,7 @@ export function InventoryPage() {
   const queryClient = useQueryClient();
   const [filter, setFilter] = useState<SKUFilter>({ page: 1, size: 20 });
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingSku, setEditingSku] = useState<SKU | null>(null);
   const [sortField, setSortField] = useState<keyof SKU>('expiry_date');
@@ -30,6 +31,24 @@ export function InventoryPage() {
     low_stock_threshold: '',
     notes: ''
   });
+
+  // Debounce search term
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Update filter when debounced search term changes
+  useEffect(() => {
+    setFilter(prev => ({ 
+      ...prev, 
+      search: debouncedSearchTerm || undefined, 
+      page: 1 
+    }));
+  }, [debouncedSearchTerm]);
 
   // Fetch inventory data
   const { data: skusData, isLoading: skusLoading, error: skusError } = useQuery({
@@ -120,11 +139,6 @@ export function InventoryPage() {
       });
     }
   });
-
-  const handleSearch = (term: string) => {
-    setSearchTerm(term);
-    setFilter({ ...filter, search: term, page: 1 });
-  };
 
   const handleQuantityUpdate = (sku: SKU, newQuantity: number) => {
     if (newQuantity >= 0) {
@@ -227,7 +241,7 @@ export function InventoryPage() {
               type="text"
               placeholder="Search items..."
               value={searchTerm}
-              onChange={(e) => handleSearch(e.target.value)}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="stocky-search-input"
             />
           </div>
