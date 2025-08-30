@@ -175,7 +175,7 @@ export function LocationsPage() {
           <select
             value={filter.storage_type || ''}
             onChange={(e) => setFilter({ ...filter, storage_type: e.target.value as StorageType || undefined, page: 1 })}
-            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            className="stocky-input"
           >
             <option value="">All Storage Types</option>
             {Object.entries(storageTypeLabels).map(([value, label]) => (
@@ -205,7 +205,7 @@ export function LocationsPage() {
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                  className="stocky-input"
                   placeholder="e.g. Main Pantry, Upstairs Freezer"
                 />
               </div>
@@ -218,7 +218,7 @@ export function LocationsPage() {
                   required
                   value={formData.storage_type}
                   onChange={(e) => setFormData({ ...formData, storage_type: e.target.value as StorageType })}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                  className="stocky-input"
                 >
                   {Object.entries(storageTypeLabels).map(([value, label]) => (
                     <option key={value} value={value}>
@@ -237,7 +237,7 @@ export function LocationsPage() {
                 rows={3}
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                className="stocky-input"
                 placeholder="Additional details about this location..."
               />
             </div>

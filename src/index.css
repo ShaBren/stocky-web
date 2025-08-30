@@ -1,80 +1,214 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-/* Custom styles for StockyWeb */
-@layer base {
-  body {
-    @apply bg-gray-50 font-sans antialiased;
+/* Global styles */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #f9fafb;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
+  color: #111827;
+  margin: 0;
+  padding: 0;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* Component-specific styles */
+.stocky-container {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+@media (min-width: 640px) {
+  .stocky-container {
+    padding: 0 1.5rem;
   }
 }
 
-@layer components {
+@media (min-width: 1024px) {
   .stocky-container {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+    padding: 0 2rem;
   }
+}
 
-  .stocky-card {
-    @apply bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden;
-  }
+.stocky-card {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+}
 
-  .stocky-button-primary {
-    @apply inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200;
-  }
+.stocky-button-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  border: 1px solid transparent;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: 0.375rem;
+  color: white;
+  background-color: #2563eb;
+  transition: background-color 0.2s;
+  cursor: pointer;
+}
 
-  .stocky-button-secondary {
-    @apply inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200;
-  }
+.stocky-button-primary:hover {
+  background-color: #1d4ed8;
+}
 
-  .stocky-input {
-    @apply block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm;
-  }
+.stocky-button-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  border: 1px solid #d1d5db;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: 0.375rem;
+  color: #374151;
+  background-color: white;
+  transition: background-color 0.2s;
+  cursor: pointer;
+}
 
-  .stocky-label {
-    @apply block text-sm font-medium text-gray-700 mb-1;
-  }
+.stocky-button-secondary:hover {
+  background-color: #f9fafb;
+}
 
-  .stocky-select {
-    @apply block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm;
-  }
+.stocky-input {
+  display: block;
+  width: 100%;
+  border-radius: 0.375rem;
+  border: 1px solid #d1d5db;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  font-size: 0.875rem;
+  padding: 0.5rem 0.75rem;
+}
 
-  .stocky-table {
-    @apply min-w-full divide-y divide-gray-200;
-  }
+.stocky-input:focus {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
 
-  .stocky-table-header {
-    @apply bg-gray-50;
-  }
+.stocky-search-input {
+  display: block;
+  width: 100%;
+  padding-left: 2.5rem;
+  padding-right: 0.75rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  background-color: white;
+  font-size: 0.875rem;
+  color: #111827;
+}
 
-  .stocky-table-header-cell {
-    @apply px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider;
-  }
+.stocky-search-input::placeholder {
+  color: #6b7280;
+}
 
-  .stocky-table-body {
-    @apply bg-white divide-y divide-gray-200;
-  }
+.stocky-search-input:focus {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 1px #3b82f6;
+}
 
-  .stocky-table-cell {
-    @apply px-6 py-4 whitespace-nowrap text-sm text-gray-900;
-  }
+/* Additional utility classes */
+.stocky-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.25rem;
+}
 
-  .stocky-badge-success {
-    @apply inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800;
-  }
+.stocky-table {
+  min-width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
 
-  .stocky-badge-danger {
-    @apply inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800;
-  }
+.stocky-table thead {
+  background-color: #f9fafb;
+}
 
-  .stocky-badge-warning {
-    @apply inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800;
-  }
+.stocky-table th {
+  padding: 0.75rem 1.5rem;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid #e5e7eb;
+}
 
-  .stocky-icon-button {
-    @apply inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 transition-colors duration-200;
-  }
+.stocky-table td {
+  padding: 1rem 1.5rem;
+  white-space: nowrap;
+  font-size: 0.875rem;
+  color: #111827;
+  border-bottom: 1px solid #e5e7eb;
+}
 
-  .stocky-search-input {
-    @apply block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm;
-  }
+.stocky-table tbody {
+  background-color: white;
+}
+
+.stocky-table tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+.stocky-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 9999px;
+}
+
+.stocky-badge-success {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.stocky-badge-danger {
+  background-color: #fecaca;
+  color: #991b1b;
+}
+
+.stocky-badge-warning {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.stocky-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  color: #6b7280;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.stocky-icon-button:hover {
+  color: #374151;
+  background-color: #f3f4f6;
 }

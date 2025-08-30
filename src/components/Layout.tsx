@@ -11,7 +11,6 @@ import {
 } from '@heroicons/react/24/outline';
 
 interface LayoutProps {
-  children: React.ReactNode;
   onLogout: () => void;
 }
 
@@ -25,21 +24,21 @@ const navigation = [
   { name: 'Users', href: '/users', icon: UsersIcon },
 ];
 
-export function Layout({ children, onLogout }: LayoutProps) {
+export function Layout({ onLogout }: LayoutProps) {
   const handleLogout = () => {
     localStorage.removeItem('token');
-    window.location.href = '/login';
+    onLogout(); // Use the passed onLogout function instead of window.location
   };
 
   return (
-        <div className="min-h-screen bg-gray-50">
-      <div className="flex">
+    <div className="min-h-screen bg-gray-50">
+      <div className="flex h-screen">
         {/* Sidebar */}
-        <div className="w-64 bg-white shadow-lg h-screen">
+        <div className="w-64 bg-white shadow-lg flex flex-col">
           <div className="p-6 border-b border-gray-200">
             <h1 className="text-xl font-bold text-gray-900">StockyWeb</h1>
           </div>
-          <nav className="mt-6">
+          <nav className="flex-1 mt-6">
             <div className="px-3 space-y-1">
               <NavLink
                 to="/"
@@ -134,7 +133,7 @@ export function Layout({ children, onLogout }: LayoutProps) {
               </NavLink>
             </div>
           </nav>
-          <div className="absolute bottom-0 w-64 p-3 border-t border-gray-200">
+          <div className="p-3 border-t border-gray-200 mt-auto">
             <button
               onClick={handleLogout}
               className="w-full flex items-center px-3 py-2 text-sm font-medium text-gray-600 rounded-md hover:bg-gray-50 hover:text-gray-900 transition-colors duration-200"
@@ -146,8 +145,8 @@ export function Layout({ children, onLogout }: LayoutProps) {
         </div>
 
         {/* Main content */}
-        <div className="flex-1 overflow-auto">
-          <main className="py-6">
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <main className="flex-1 overflow-auto py-6">
             <div className="stocky-container">
               <Outlet />
             </div>

@@ -170,7 +170,7 @@ export function ItemsPage() {
           <select
             value={filter.storage_type || ''}
             onChange={(e) => setFilter({ ...filter, storage_type: e.target.value as StorageType || undefined, page: 1 })}
-            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            className="stocky-input"
           >
             <option value="">All Storage Types</option>
             {Object.entries(storageTypeLabels).map(([value, label]) => (
@@ -200,7 +200,7 @@ export function ItemsPage() {
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                  className="stocky-input"
                 />
               </div>
               <div>
@@ -213,7 +213,7 @@ export function ItemsPage() {
                     id="upc"
                     value={formData.upc}
                     onChange={(e) => setFormData({ ...formData, upc: e.target.value })}
-                    className="block w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                    className="stocky-input pr-10"
                   />
                   <QrCodeIcon className="h-5 w-5 absolute right-3 top-3 text-gray-400" />
                 </div>
@@ -228,7 +228,7 @@ export function ItemsPage() {
                 rows={3}
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                className="stocky-input"
               />
             </div>
             <div>
@@ -240,7 +240,7 @@ export function ItemsPage() {
                 required
                 value={formData.default_storage_type}
                 onChange={(e) => setFormData({ ...formData, default_storage_type: e.target.value as StorageType })}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                className="stocky-input"
               >
                 {Object.entries(storageTypeLabels).map(([value, label]) => (
                   <option key={value} value={value}>

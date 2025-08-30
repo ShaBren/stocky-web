@@ -64,9 +64,9 @@ function App() {
               <Route path="*" element={<Navigate to="/login" replace />} />
             </Routes>
           ) : (
-            <Layout onLogout={handleLogout}>
-              <Routes>
-                <Route path="/" element={<DashboardPage />} />
+            <Routes>
+              <Route path="/" element={<Layout onLogout={handleLogout} />}>
+                <Route index element={<DashboardPage />} />
                 <Route path="/dashboard" element={<DashboardPage />} />
                 <Route path="/inventory" element={<InventoryPage />} />
                 <Route path="/items" element={<ItemsPage />} />
@@ -75,8 +75,8 @@ function App() {
                 <Route path="/alerts" element={<AlertsPage />} />
                 <Route path="/users" element={<UsersPage />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </Layout>
+              </Route>
+            </Routes>
           )}
         </div>
       </Router>
