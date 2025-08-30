@@ -38,7 +38,7 @@ const refreshToken = async (): Promise<string> => {
 
   refreshPromise = (async () => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {}, {
+      const response = await axios.post(`${API_BASE_URL}/auth/refresh/`, {}, {
         headers: {
           'Authorization': `Bearer ${authToken}`,
           'Content-Type': 'application/json'
