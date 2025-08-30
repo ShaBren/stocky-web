@@ -2,12 +2,15 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { skusAPI, itemsAPI, locationsAPI } from '../services/api';
 import type { SKU, SKUFilter } from '../types/api';
+import { SearchableDropdown } from '../components/SearchableDropdown';
 import { 
   PlusIcon, 
   MagnifyingGlassIcon,
   PencilIcon,
   TrashIcon,
-  ExclamationTriangleIcon
+  ExclamationTriangleIcon,
+  ChevronUpIcon,
+  ChevronDownIcon
 } from '@heroicons/react/24/outline';
 
 export function InventoryPage() {
@@ -16,6 +19,8 @@ export function InventoryPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingSku, setEditingSku] = useState<SKU | null>(null);
+  const [sortField, setSortField] = useState<keyof SKU>('expiry_date');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [formData, setFormData] = useState({
     item_id: '',
     location_id: '',
@@ -49,6 +54,39 @@ export function InventoryPage() {
   // Create lookup maps for items and locations
   const itemsMap = new Map(itemsData?.map(item => [item.id, item]) || []);
   const locationsMap = new Map(locationsData?.map(location => [location.id, location]) || []);
+
+  // Extract unique units from existing SKUs
+  const availableUnits = Array.from(new Set(skusData?.map(sku => sku.unit).filter(Boolean) || [])).sort();
+
+  // Sort SKUs
+  const sortedSKUs = skusData ? [...skusData].sort((a, b) => {
+    let aValue = a[sortField];
+    let bValue = b[sortField];
+
+    // Handle expiry date specially - nulls should be last
+    if (sortField === 'expiry_date') {
+      if (!aValue && !bValue) return 0;
+      if (!aValue) return 1;
+      if (!bValue) return -1;
+      aValue = new Date(aValue as string).getTime();
+      bValue = new Date(bValue as string).getTime();
+    }
+
+    // Handle numeric fields
+    if (typeof aValue === 'number' && typeof bValue === 'number') {
+      return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+    }
+
+    // Handle string fields
+    const aStr = String(aValue || '').toLowerCase();
+    const bStr = String(bValue || '').toLowerCase();
+    
+    if (sortDirection === 'asc') {
+      return aStr < bStr ? -1 : aStr > bStr ? 1 : 0;
+    } else {
+      return aStr > bStr ? -1 : aStr < bStr ? 1 : 0;
+    }
+  }) : [];
 
   // Mutations
   const updateQuantityMutation = useMutation({
@@ -109,7 +147,7 @@ export function InventoryPage() {
       quantity: Number(formData.quantity),
       unit: formData.unit,
       expiry_date: formData.expiry_date || null,
-      low_stock_threshold: formData.low_stock_threshold ? Number(formData.low_stock_threshold) : null,
+      low_stock_threshold: formData.low_stock_threshold ? parseInt(formData.low_stock_threshold) : null,
       notes: formData.notes || null
     };
 
@@ -122,6 +160,22 @@ export function InventoryPage() {
       ...prev,
       [name]: value
     }));
+  };
+
+  const handleSort = (field: keyof SKU) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const getSortIcon = (field: keyof SKU) => {
+    if (sortField !== field) return null;
+    return sortDirection === 'asc' ? 
+      <ChevronUpIcon className="h-4 w-4 inline ml-1" /> : 
+      <ChevronDownIcon className="h-4 w-4 inline ml-1" />;
   };
 
   const isLowStock = (sku: SKU) => {
@@ -213,19 +267,44 @@ export function InventoryPage() {
             <thead className="stocky-table-header">
               <tr>
                 <th className="stocky-table-header-cell">
-                  Item
+                  <button
+                    onClick={() => handleSort('item_id')}
+                    className="flex items-center hover:text-blue-600 focus:text-blue-600"
+                  >
+                    Item {getSortIcon('item_id')}
+                  </button>
                 </th>
                 <th className="stocky-table-header-cell">
-                  Location
+                  <button
+                    onClick={() => handleSort('location_id')}
+                    className="flex items-center hover:text-blue-600 focus:text-blue-600"
+                  >
+                    Location {getSortIcon('location_id')}
+                  </button>
                 </th>
                 <th className="stocky-table-header-cell">
-                  Quantity
+                  <button
+                    onClick={() => handleSort('quantity')}
+                    className="flex items-center hover:text-blue-600 focus:text-blue-600"
+                  >
+                    Quantity {getSortIcon('quantity')}
+                  </button>
                 </th>
                 <th className="stocky-table-header-cell">
-                  Unit
+                  <button
+                    onClick={() => handleSort('unit')}
+                    className="flex items-center hover:text-blue-600 focus:text-blue-600"
+                  >
+                    Unit {getSortIcon('unit')}
+                  </button>
                 </th>
                 <th className="stocky-table-header-cell">
-                  Expiry Date
+                  <button
+                    onClick={() => handleSort('expiry_date')}
+                    className="flex items-center hover:text-blue-600 focus:text-blue-600"
+                  >
+                    Expiry Date {getSortIcon('expiry_date')}
+                  </button>
                 </th>
                 <th className="stocky-table-header-cell">
                   Actions
@@ -233,7 +312,7 @@ export function InventoryPage() {
               </tr>
             </thead>
             <tbody className="stocky-table-body">
-              {skusData?.map((sku) => (
+              {sortedSKUs?.map((sku) => (
                 <tr key={sku.id} className={isLowStock(sku) ? 'bg-yellow-50' : ''}>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
@@ -307,7 +386,7 @@ export function InventoryPage() {
       </div>
 
       {/* Empty State */}
-      {skusData?.length === 0 && (
+      {sortedSKUs?.length === 0 && (
         <div className="text-center py-12">
           <p className="text-gray-500 text-lg">No inventory items found</p>
           <p className="text-gray-400 text-sm mt-2">
@@ -332,37 +411,29 @@ export function InventoryPage() {
                     <label htmlFor="item_id" className="stocky-label">
                       Item *
                     </label>
-                    <select
+                    <SearchableDropdown
                       id="item_id"
                       name="item_id"
                       value={formData.item_id}
-                      onChange={handleInputChange}
+                      onChange={(value) => setFormData(prev => ({ ...prev, item_id: String(value) }))}
+                      options={itemsData?.map(item => ({ value: item.id, label: item.name })) || []}
+                      placeholder="Search for an item..."
                       required
-                      className="stocky-input"
-                    >
-                      <option value="">Select an item</option>
-                      {itemsData?.map(item => (
-                        <option key={item.id} value={item.id}>{item.name}</option>
-                      ))}
-                    </select>
+                    />
                   </div>
                   <div>
                     <label htmlFor="location_id" className="stocky-label">
                       Location *
                     </label>
-                    <select
+                    <SearchableDropdown
                       id="location_id"
                       name="location_id"
                       value={formData.location_id}
-                      onChange={handleInputChange}
+                      onChange={(value) => setFormData(prev => ({ ...prev, location_id: String(value) }))}
+                      options={locationsData?.map(location => ({ value: location.id, label: location.name })) || []}
+                      placeholder="Search for a location..."
                       required
-                      className="stocky-input"
-                    >
-                      <option value="">Select a location</option>
-                      {locationsData?.map(location => (
-                        <option key={location.id} value={location.id}>{location.name}</option>
-                      ))}
-                    </select>
+                    />
                   </div>
                   <div>
                     <label htmlFor="quantity" className="stocky-label">
@@ -385,15 +456,16 @@ export function InventoryPage() {
                     <label htmlFor="unit" className="stocky-label">
                       Unit *
                     </label>
-                    <input
-                      type="text"
+                    <SearchableDropdown
                       id="unit"
                       name="unit"
                       value={formData.unit}
-                      onChange={handleInputChange}
+                      onChange={(value) => setFormData(prev => ({ ...prev, unit: String(value) }))}
+                      options={availableUnits.map(unit => ({ value: unit, label: unit }))}
+                      placeholder="Enter or select a unit..."
                       required
-                      className="stocky-input"
-                      placeholder="e.g. pieces, kg, litres"
+                      allowCustom
+                      onCustomValue={(value) => setFormData(prev => ({ ...prev, unit: value }))}
                     />
                   </div>
                   <div>
@@ -420,9 +492,9 @@ export function InventoryPage() {
                       value={formData.low_stock_threshold}
                       onChange={handleInputChange}
                       min="0"
-                      step="0.01"
+                      step="1"
                       className="stocky-input"
-                      placeholder="0.00"
+                      placeholder="0"
                     />
                   </div>
                 </div>
