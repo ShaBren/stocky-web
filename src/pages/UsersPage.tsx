@@ -271,13 +271,15 @@ export default function UsersPage() {
             Manage users and their roles in the system
           </p>
         </div>
-        <button
-          onClick={handleAddStart}
-          className="stocky-button-primary flex items-center space-x-2"
-        >
-          <PlusIcon className="h-5 w-5" />
-          <span>Add User</span>
-        </button>
+        {canCreate && (
+          <button
+            onClick={handleAddStart}
+            className="stocky-button-primary flex items-center space-x-2"
+          >
+            <PlusIcon className="h-5 w-5" />
+            <span>Add User</span>
+          </button>
+        )}
       </div>
 
       {/* Search */}
