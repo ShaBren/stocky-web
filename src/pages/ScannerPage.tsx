@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { skusAPI, itemsAPI, locationsAPI } from '../services/api';
 import type { SKU, Item } from '../types/api';
+import { usePageTitle } from '../utils/usePageTitle';
 import { 
   PlusIcon, 
   MinusIcon,
@@ -27,7 +28,9 @@ interface Toast {
   timestamp: number;
 }
 
-export function ScannerPage() {
+export default function ScannerPage() {
+  usePageTitle('Scanner');
+  
   const queryClient = useQueryClient();
   const [action, setAction] = useState<'add' | 'remove'>('add');
   const [selectedLocationId, setSelectedLocationId] = useState<number | null>(null);

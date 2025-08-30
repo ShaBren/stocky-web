@@ -1,38 +1,28 @@
 import { useQuery } from '@tanstack/react-query';
-import { skusAPI, alertsAPI, healthAPI, itemsAPI, locationsAPI } from '../services/api';
+import { skusAPI, itemsAPI, locationsAPI } from '../services/api';
+import { usePageTitle } from '../utils/usePageTitle';
+import type { Item, Location } from '../types/api';
 import { 
-  CubeIcon, 
-  ExclamationTriangleIcon, 
-  CheckCircleIcon,
-  ClockIcon
+  CubeIcon,
+  ExclamationTriangleIcon,
+  CheckCircleIcon
 } from '@heroicons/react/24/outline';
 
-export function DashboardPage() {
+export default function DashboardPage() {
+  usePageTitle('Dashboard');
+  // Data queries
   const { data: skusData, error: skusError } = useQuery({
     queryKey: ['skus'],
     queryFn: () => skusAPI.getSKUs(),
     retry: 1
   });
 
-  // Calculate low stock items client-side with proper threshold logic
+  // Filter low stock SKUs
   const lowStockData = skusData?.filter(sku => {
     // Only consider items low stock if they have a threshold AND quantity is below it
     return sku.low_stock_threshold != null && sku.quantity <= sku.low_stock_threshold;
   }) || [];
 
-  const { data: alertsData } = useQuery({
-    queryKey: ['alerts', { unread_only: true }],
-    queryFn: () => alertsAPI.getAlerts(1, 100, true),
-    retry: 1
-  });
-
-  const { data: healthData } = useQuery({
-    queryKey: ['health'],
-    queryFn: healthAPI.check,
-    retry: 1
-  });
-
-  // Fetch items and locations for lookup
   const { data: itemsData } = useQuery({
     queryKey: ['items'],
     queryFn: () => itemsAPI.getItems(),
@@ -45,9 +35,8 @@ export function DashboardPage() {
     retry: 1
   });
 
-  // Create lookup maps
-  const itemsMap = new Map(itemsData?.map(item => [item.id, item]) || []);
-  const locationsMap = new Map(locationsData?.map(location => [location.id, location]) || []);
+  const itemsMap = new Map((itemsData || []).map((item: Item) => [item.id, item]));
+  const locationsMap = new Map((locationsData || []).map((location: Location) => [location.id, location]));
 
   const stats = [
     {
@@ -63,16 +52,10 @@ export function DashboardPage() {
       color: 'bg-yellow-500'
     },
     {
-      name: 'Unread Alerts',
-      value: alertsData?.length || 0,
-      icon: ClockIcon,
-      color: 'bg-red-500'
-    },
-    {
       name: 'System Status',
-      value: healthData?.status === 'healthy' ? 'Online' : 'Offline',
+      value: 'Online',
       icon: CheckCircleIcon,
-      color: healthData?.status === 'healthy' ? 'bg-green-500' : 'bg-red-500'
+      color: 'bg-green-500'
     }
   ];
 
@@ -117,35 +100,6 @@ export function DashboardPage() {
           </div>
         ))}
       </div>
-
-      {/* Recent Alerts */}
-      {alertsData && alertsData.length > 0 && (
-        <div className="stocky-card">
-          <div className="px-4 py-5 sm:p-6">
-            <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-              Recent Alerts
-            </h3>
-            <div className="space-y-3">
-              {alertsData.slice(0, 5).map((alert) => (
-                <div key={alert.id} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-md">
-                  <ExclamationTriangleIcon className="h-5 w-5 text-yellow-500 mt-0.5" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900">
-                      {alert.title}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      {alert.message}
-                    </p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      {new Date(alert.created_at).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Low Stock Items */}
       {lowStockData.length > 0 && (

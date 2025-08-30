@@ -1,4 +1,8 @@
-export function AlertsPage() {
+import { usePageTitle } from '../utils/usePageTitle';
+
+export default function AlertsPage() {
+  usePageTitle('Alerts');
+  
   return (
     <div className="space-y-6">
       <div>

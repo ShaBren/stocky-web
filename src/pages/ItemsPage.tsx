@@ -6,6 +6,7 @@ import { StorageType as StorageTypeEnum } from '../types/api';
 import { ErrorDisplay } from '../components/ErrorDisplay';
 import { parseValidationErrors, getGeneralErrorMessage } from '../utils/errorHandling';
 import { canPerformAction } from '../utils/permissions';
+import { usePageTitle } from '../utils/usePageTitle';
 import { 
   PlusIcon, 
   MagnifyingGlassIcon,
@@ -21,7 +22,9 @@ interface ItemFormData {
   default_storage_type: StorageType;
 }
 
-export function ItemsPage() {
+export default function ItemsPage() {
+  usePageTitle('Items');
+  
   const queryClient = useQueryClient();
   const [filter, setFilter] = useState<ItemFilter>({ page: 1, size: 20 });
   const [searchTerm, setSearchTerm] = useState('');

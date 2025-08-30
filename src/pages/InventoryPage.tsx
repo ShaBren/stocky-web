@@ -6,6 +6,7 @@ import { SearchableDropdown } from '../components/SearchableDropdown';
 import { ErrorDisplay } from '../components/ErrorDisplay';
 import { parseValidationErrors, getGeneralErrorMessage } from '../utils/errorHandling';
 import { canPerformAction } from '../utils/permissions';
+import { usePageTitle } from '../utils/usePageTitle';
 import { 
   PlusIcon, 
   MagnifyingGlassIcon,
@@ -16,7 +17,9 @@ import {
   ChevronDownIcon
 } from '@heroicons/react/24/outline';
 
-export function InventoryPage() {
+export default function InventoryPage() {
+  usePageTitle('Inventory');
+  
   const queryClient = useQueryClient();
   const [filter] = useState<SKUFilter>({ page: 1, size: 20 });
   const [searchTerm, setSearchTerm] = useState('');

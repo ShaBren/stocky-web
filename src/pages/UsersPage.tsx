@@ -4,6 +4,7 @@ import { usersAPI, authAPI } from '../services/api';
 import type { User } from '../types/api';
 import { ErrorDisplay } from '../components/ErrorDisplay';
 import { parseValidationErrors, getGeneralErrorMessage } from '../utils/errorHandling';
+import { usePageTitle } from '../utils/usePageTitle';
 import { 
   PlusIcon, 
   MagnifyingGlassIcon,
@@ -23,7 +24,9 @@ interface UserFormData {
   password?: string;
 }
 
-export function UsersPage() {
+export default function UsersPage() {
+  usePageTitle('Users');
+  
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);

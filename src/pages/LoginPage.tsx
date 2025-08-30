@@ -2,12 +2,15 @@ import { useState } from 'react';
 import { authAPI } from '../services/api';
 import { ErrorDisplay } from '../components/ErrorDisplay';
 import { parseValidationErrors, getGeneralErrorMessage } from '../utils/errorHandling';
+import { usePageTitle } from '../utils/usePageTitle';
 
 interface LoginPageProps {
   onLogin: (token: string) => void;
 }
 
-export function LoginPage({ onLogin }: LoginPageProps) {
+export default function LoginPage({ onLogin }: LoginPageProps) {
+  usePageTitle('Login');
+  
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
