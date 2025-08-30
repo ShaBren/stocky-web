@@ -84,11 +84,20 @@ export function UsersPage() {
   });
 
   // Filter users based on search term
-  const filteredUsers = usersData?.items?.filter(user => 
+  const allUsers: User[] = Array.isArray(usersData) 
+    ? usersData 
+    : usersData?.items || [];
+  
+  // Debug: log the actual data structure
+  console.log('usersData:', usersData);
+  console.log('allUsers:', allUsers);
+  console.log('currentUser:', currentUser);
+  
+  const filteredUsers = allUsers.filter((user: User) => 
     user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.full_name.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
+  );
 
   const resetForm = () => {
     setFormData({
@@ -286,7 +295,7 @@ export function UsersPage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredUsers.map((user) => {
+              {filteredUsers.map((user: User) => {
                 const RoleIcon = getRoleIcon(user.role);
                 return (
                   <tr key={user.id} className="hover:bg-gray-50">
