@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { skusAPI, itemsAPI, locationsAPI } from '../services/api';
 import type { SKU, Item } from '../types/api';
+import { StorageType } from '../types/api';
 import { 
   PlusIcon, 
   MinusIcon,
@@ -48,6 +49,13 @@ export function ScannerPage() {
   const { data: skusData } = useQuery({
     queryKey: ['skus'],
     queryFn: () => skusAPI.getSKUs({ page: 1, size: 1000 }),
+    retry: 1
+  });
+
+  // Fetch items data for barcode lookup
+  const { data: itemsData } = useQuery({
+    queryKey: ['items'],
+    queryFn: () => itemsAPI.getItems(),
     retry: 1
   });
 
@@ -141,13 +149,15 @@ export function ScannerPage() {
   const processScanJob = async (job: ScanJob) => {
     const { barcode, action, locationId } = job;
     
-    // Find existing SKU for this barcode and location
-    // Note: This is a simplified lookup - in a real app, you'd need to
-    // match by barcode field on the item or have a barcode lookup table
-    const existingSKU = skusData?.find(sku => {
-      return sku.location_id === locationId && 
-             String(sku.item_id).includes(barcode.slice(-3)); // Simplified matching
-    });
+    // Find item by barcode/UPC
+    const itemWithBarcode = itemsData?.find(item => 
+      item.upc === barcode || item.upc === barcode.toString()
+    );
+
+    // Find existing SKU for this item and location
+    const existingSKU = itemWithBarcode ? skusData?.find(sku => 
+      sku.item_id === itemWithBarcode.id && sku.location_id === locationId
+    ) : null;
 
     if (action === 'add') {
       if (existingSKU) {
@@ -166,15 +176,21 @@ export function ScannerPage() {
       } else {
         // Create new item and SKU
         try {
-          // First, create or find the item with this barcode
-          const newItem = await createItemMutation.mutateAsync({
-            name: `Item ${barcode}`,
-            description: `Scanned item with barcode ${barcode}`
-          });
+          let itemToUse = itemWithBarcode;
+          
+          // If no item exists with this barcode, create one
+          if (!itemToUse) {
+            itemToUse = await createItemMutation.mutateAsync({
+              name: `Item ${barcode}`,
+              description: `Scanned item with barcode ${barcode}`,
+              upc: barcode,
+              default_storage_type: 'pantry'
+            });
+          }
 
-          // Then create the SKU
+          // Create the SKU for this item and location
           await createSKUMutation.mutateAsync({
-            item_id: newItem.id,
+            item_id: itemToUse.id,
             location_id: locationId,
             quantity: 1,
             unit: 'pieces'
@@ -182,17 +198,17 @@ export function ScannerPage() {
 
           setScanJobs(prev => prev.map(j => 
             j.id === job.id 
-              ? { ...j, status: 'completed', message: 'Added new item (quantity: 1)' }
+              ? { ...j, status: 'completed', message: itemWithBarcode ? 'Added item to new location (quantity: 1)' : 'Added new item (quantity: 1)' }
               : j
           ));
-          addToast('success', 'Added new item (quantity: 1)');
+          addToast('success', itemWithBarcode ? 'Added item to new location (quantity: 1)' : 'Added new item (quantity: 1)');
         } catch (error) {
           setScanJobs(prev => prev.map(j => 
             j.id === job.id 
-              ? { ...j, status: 'error', message: 'Failed to create item' }
+              ? { ...j, status: 'error', message: 'Failed to create item or SKU' }
               : j
           ));
-          addToast('error', 'Failed to create item');
+          addToast('error', 'Failed to create item or SKU');
         }
       }
     } else if (action === 'remove') {
