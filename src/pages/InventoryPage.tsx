@@ -10,8 +10,7 @@ import {
   TrashIcon,
   ExclamationTriangleIcon,
   ChevronUpIcon,
-  ChevronDownIcon,
-  XMarkIcon
+  ChevronDownIcon
 } from '@heroicons/react/24/outline';
 
 export function InventoryPage() {
@@ -22,6 +21,7 @@ export function InventoryPage() {
   const [lowStockFilter, setLowStockFilter] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingSku, setEditingSku] = useState<SKU | null>(null);
+  const [isEditMode, setIsEditMode] = useState(false);
   const [sortField, setSortField] = useState<keyof SKU>('expiry_date');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [formData, setFormData] = useState({
@@ -146,6 +146,8 @@ export function InventoryPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['skus'] });
       setShowAddForm(false);
+      setIsEditMode(false);
+      setEditingSku(null);
       setFormData({
         item_id: '',
         location_id: '',
@@ -162,7 +164,18 @@ export function InventoryPage() {
     mutationFn: ({ id, data }: { id: number; data: Partial<SKU> }) => skusAPI.updateSKU(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['skus'] });
+      setShowAddForm(false);
+      setIsEditMode(false);
       setEditingSku(null);
+      setFormData({
+        item_id: '',
+        location_id: '',
+        quantity: '',
+        unit: '',
+        expiry_date: '',
+        low_stock_threshold: '',
+        notes: ''
+      });
     }
   });
 
@@ -191,7 +204,19 @@ export function InventoryPage() {
       notes: formData.notes || null
     };
 
-    createSKUMutation.mutate(submitData);
+    if (isEditMode && editingSku) {
+      // Handle edit mode
+      const updateData = {
+        ...submitData,
+        expiry_date: formData.expiry_date || undefined, // Use undefined for edit
+        low_stock_threshold: formData.low_stock_threshold ? parseInt(formData.low_stock_threshold) : undefined,
+        notes: formData.notes || undefined
+      };
+      updateSKUMutation.mutate({ id: editingSku.id, data: updateData });
+    } else {
+      // Handle add mode
+      createSKUMutation.mutate(submitData);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -202,24 +227,9 @@ export function InventoryPage() {
     }));
   };
 
-  const handleEditSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!editingSku) return;
-
-    const updateData = {
-      quantity: Number(formData.quantity),
-      unit: formData.unit,
-      expiry_date: formData.expiry_date || undefined,
-      low_stock_threshold: formData.low_stock_threshold ? parseInt(formData.low_stock_threshold) : undefined,
-      notes: formData.notes || undefined
-    };
-
-    updateSKUMutation.mutate({ id: editingSku.id, data: updateData });
-  };
-
   const handleEditStart = (sku: SKU) => {
     setEditingSku(sku);
+    setIsEditMode(true);
     setFormData({
       item_id: String(sku.item_id),
       location_id: String(sku.location_id),
@@ -229,6 +239,22 @@ export function InventoryPage() {
       low_stock_threshold: sku.low_stock_threshold ? String(sku.low_stock_threshold) : '',
       notes: sku.notes || ''
     });
+    setShowAddForm(true); // Reuse the same modal
+  };
+
+  const handleAddStart = () => {
+    setEditingSku(null);
+    setIsEditMode(false);
+    setFormData({
+      item_id: '',
+      location_id: '',
+      quantity: '',
+      unit: '',
+      expiry_date: '',
+      low_stock_threshold: '',
+      notes: ''
+    });
+    setShowAddForm(true);
   };
 
   const handleSort = (field: keyof SKU) => {
@@ -279,7 +305,7 @@ export function InventoryPage() {
           </p>
         </div>
         <button
-          onClick={() => setShowAddForm(true)}
+          onClick={handleAddStart}
           className="stocky-button-primary flex items-center space-x-2"
         >
           <PlusIcon className="h-5 w-5" />
@@ -472,7 +498,7 @@ export function InventoryPage() {
           <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
             <div className="mt-3">
               <h3 className="text-lg font-medium text-gray-900 mb-4">
-                Add Inventory Item
+                {isEditMode ? 'Edit Inventory Item' : 'Add Inventory Item'}
               </h3>
               <form onSubmit={handleFormSubmit}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -584,121 +610,29 @@ export function InventoryPage() {
                 <div className="flex justify-end space-x-3 mt-6">
                   <button
                     type="button"
-                    onClick={() => setShowAddForm(false)}
+                    onClick={() => {
+                      setShowAddForm(false);
+                      setIsEditMode(false);
+                      setEditingSku(null);
+                    }}
                     className="stocky-button-secondary"
-                    disabled={createSKUMutation.isPending}
+                    disabled={createSKUMutation.isPending || updateSKUMutation.isPending}
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     className="stocky-button-primary"
-                    disabled={createSKUMutation.isPending}
+                    disabled={createSKUMutation.isPending || updateSKUMutation.isPending}
                   >
-                    {createSKUMutation.isPending ? 'Adding...' : 'Add Inventory'}
+                    {isEditMode 
+                      ? (updateSKUMutation.isPending ? 'Updating...' : 'Update Inventory')
+                      : (createSKUMutation.isPending ? 'Adding...' : 'Add Inventory')
+                    }
                   </button>
                 </div>
               </form>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Edit Inventory Modal */}
-      {editingSku && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Edit Inventory</h3>
-              <button
-                onClick={() => setEditingSku(null)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <XMarkIcon className="h-6 w-6" />
-              </button>
-            </div>
-            
-            <form onSubmit={handleEditSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Item *
-                </label>
-                <SearchableDropdown
-                  id="edit_item_id"
-                  name="edit_item_id"
-                  value={editingSku.item?.id || ''}
-                  onChange={(value) => {
-                    const item = itemsData?.find(i => i.id === Number(value));
-                    if (item) setEditingSku({ ...editingSku, item });
-                  }}
-                  options={itemsData?.map(item => ({ value: item.id, label: item.name })) || []}
-                  placeholder="Search for an item..."
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Location *
-                </label>
-                <SearchableDropdown
-                  id="edit_location_id"
-                  name="edit_location_id"
-                  value={editingSku.location?.id || ''}
-                  onChange={(value) => {
-                    const location = locationsData?.find(l => l.id === Number(value));
-                    if (location) setEditingSku({ ...editingSku, location });
-                  }}
-                  options={locationsData?.map(location => ({ value: location.id, label: location.name })) || []}
-                  placeholder="Search for a location..."
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Quantity *
-                </label>
-                <input
-                  type="number"
-                  value={editingSku.quantity}
-                  onChange={(e) => setEditingSku({ ...editingSku, quantity: Number(e.target.value) })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                  min="0"
-                  step="0.01"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Expiry Date
-                </label>
-                <input
-                  type="date"
-                  value={editingSku.expiry_date || ''}
-                  onChange={(e) => setEditingSku({ ...editingSku, expiry_date: e.target.value || undefined })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div className="flex space-x-3 pt-4">
-                <button
-                  type="submit"
-                  disabled={updateSKUMutation.isPending}
-                  className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50"
-                >
-                  {updateSKUMutation.isPending ? 'Updating...' : 'Update'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setEditingSku(null)}
-                  className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
           </div>
         </div>
       )}
