@@ -38,7 +38,19 @@ export function SearchableDropdown({
 
   // Always compute display value from current value and options
   const getDisplayValue = () => {
-    const option = options.find(opt => opt.value === value);
+    // Try to find option with exact match first
+    let option = options.find(opt => opt.value === value);
+    
+    // If no exact match and value is a string, try converting to number
+    if (!option && typeof value === 'string' && !isNaN(Number(value))) {
+      option = options.find(opt => opt.value === Number(value));
+    }
+    
+    // If still no match and value is a number, try converting to string
+    if (!option && typeof value === 'number') {
+      option = options.find(opt => opt.value === String(value));
+    }
+    
     if (option) {
       return option.label;
     } else if (value) {
