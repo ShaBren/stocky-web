@@ -14,11 +14,11 @@ export function DashboardPage() {
     retry: 1
   });
 
-  const { data: lowStockData, isLoading: lowStockLoading } = useQuery({
-    queryKey: ['skus', { low_stock: true }],
-    queryFn: () => skusAPI.getSKUs({ low_stock: true }),
-    retry: 1
-  });
+  // Calculate low stock items client-side with proper threshold logic
+  const lowStockData = skusData?.filter(sku => {
+    // Only consider items low stock if they have a threshold AND quantity is below it
+    return sku.low_stock_threshold != null && sku.quantity <= sku.low_stock_threshold;
+  }) || [];
 
   const { data: alertsData, isLoading: alertsLoading } = useQuery({
     queryKey: ['alerts', { unread_only: true }],
@@ -58,7 +58,7 @@ export function DashboardPage() {
     },
     {
       name: 'Low Stock Items',
-      value: lowStockData?.length || 0,
+      value: lowStockData.length,
       icon: ExclamationTriangleIcon,
       color: 'bg-yellow-500'
     },
@@ -148,7 +148,7 @@ export function DashboardPage() {
       )}
 
       {/* Low Stock Items */}
-      {lowStockData && lowStockData.length > 0 && (
+      {lowStockData.length > 0 && (
         <div className="stocky-card">
           <div className="px-4 py-5 sm:p-6">
             <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
