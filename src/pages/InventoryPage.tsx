@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { skusAPI, itemsAPI, locationsAPI } from '../services/api';
 import type { SKU, SKUFilter } from '../types/api';
@@ -17,7 +17,8 @@ export function InventoryPage() {
   const queryClient = useQueryClient();
   const [filter, setFilter] = useState<SKUFilter>({ page: 1, size: 20 });
   const [searchTerm, setSearchTerm] = useState('');
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+  const [locationFilter, setLocationFilter] = useState<number | undefined>(undefined);
+  const [lowStockFilter, setLowStockFilter] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingSku, setEditingSku] = useState<SKU | null>(null);
   const [sortField, setSortField] = useState<keyof SKU>('expiry_date');
@@ -31,24 +32,6 @@ export function InventoryPage() {
     low_stock_threshold: '',
     notes: ''
   });
-
-  // Debounce search term
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchTerm(searchTerm);
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
-
-  // Update filter when debounced search term changes
-  useEffect(() => {
-    setFilter(prev => ({ 
-      ...prev, 
-      search: debouncedSearchTerm || undefined, 
-      page: 1 
-    }));
-  }, [debouncedSearchTerm]);
 
   // Fetch inventory data
   const { data: skusData, isLoading: skusLoading, error: skusError } = useQuery({
@@ -77,8 +60,42 @@ export function InventoryPage() {
   // Extract unique units from existing SKUs
   const availableUnits = Array.from(new Set(skusData?.map(sku => sku.unit).filter(Boolean) || [])).sort();
 
-  // Sort SKUs
-  const sortedSKUs = skusData ? [...skusData].sort((a, b) => {
+  // Client-side filtering
+  const filteredSKUs = skusData ? skusData.filter(sku => {
+    // Search filter
+    if (searchTerm) {
+      const item = itemsMap.get(sku.item_id);
+      const location = locationsMap.get(sku.location_id);
+      const searchLower = searchTerm.toLowerCase();
+      
+      const matchesItem = item?.name.toLowerCase().includes(searchLower) || 
+                         item?.description?.toLowerCase().includes(searchLower);
+      const matchesLocation = location?.name.toLowerCase().includes(searchLower);
+      const matchesUnit = sku.unit.toLowerCase().includes(searchLower);
+      
+      if (!matchesItem && !matchesLocation && !matchesUnit) {
+        return false;
+      }
+    }
+    
+    // Location filter
+    if (locationFilter && sku.location_id !== locationFilter) {
+      return false;
+    }
+    
+    // Low stock filter
+    if (lowStockFilter) {
+      const isLowStock = sku.low_stock_threshold && sku.quantity <= sku.low_stock_threshold;
+      if (!isLowStock) {
+        return false;
+      }
+    }
+    
+    return true;
+  }) : [];
+
+  // Sort filtered SKUs
+  const sortedSKUs = filteredSKUs ? [...filteredSKUs].sort((a, b) => {
     let aValue = a[sortField];
     let bValue = b[sortField];
 
@@ -247,8 +264,8 @@ export function InventoryPage() {
           </div>
           <div className="md:col-span-3">
             <select
-              value={filter.location_id || ''}
-              onChange={(e) => setFilter({ ...filter, location_id: e.target.value ? Number(e.target.value) : undefined, page: 1 })}
+              value={locationFilter || ''}
+              onChange={(e) => setLocationFilter(e.target.value ? Number(e.target.value) : undefined)}
               className="stocky-input"
             >
               <option value="">All Locations</option>
@@ -263,8 +280,8 @@ export function InventoryPage() {
             <input
               type="checkbox"
               id="lowStock"
-              checked={filter.low_stock || false}
-              onChange={(e) => setFilter({ ...filter, low_stock: e.target.checked, page: 1 })}
+              checked={lowStockFilter}
+              onChange={(e) => setLowStockFilter(e.target.checked)}
               className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
             />
             <label htmlFor="lowStock" className="text-sm text-gray-700">
@@ -404,7 +421,7 @@ export function InventoryPage() {
         <div className="text-center py-12">
           <p className="text-gray-500 text-lg">No inventory items found</p>
           <p className="text-gray-400 text-sm mt-2">
-            {filter.search || filter.location_id || filter.low_stock
+            {searchTerm || locationFilter || lowStockFilter
               ? 'Try adjusting your filters'
               : 'Add your first inventory item to get started'}
           </p>
