@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { authAPI } from '../services/api';
+import { ErrorDisplay } from '../components/ErrorDisplay';
+import { parseValidationErrors, getGeneralErrorMessage } from '../utils/errorHandling';
 
 interface LoginPageProps {
   onLogin: (token: string) => void;
@@ -9,18 +11,24 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [errors, setErrors] = useState<string[]>([]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
+    setErrors([]);
 
     try {
       const response = await authAPI.login({ username, password });
       onLogin(response.access_token);
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Login failed. Please try again.');
+      const validationErrors = parseValidationErrors(err);
+      if (validationErrors.length === 0) {
+        const generalError = getGeneralErrorMessage(err);
+        setErrors([generalError]);
+      } else {
+        setErrors(validationErrors);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -38,11 +46,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-              {error}
-            </div>
-          )}
+          <ErrorDisplay errors={errors} />
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
               <label htmlFor="username" className="sr-only">

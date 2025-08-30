@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { usersAPI, authAPI } from '../services/api';
 import type { User } from '../types/api';
+import { ErrorDisplay } from '../components/ErrorDisplay';
+import { parseValidationErrors, getGeneralErrorMessage } from '../utils/errorHandling';
 import { 
   PlusIcon, 
   MagnifyingGlassIcon,
@@ -27,6 +29,7 @@ export function UsersPage() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [formErrors, setFormErrors] = useState<string[]>([]);
   const [formData, setFormData] = useState<UserFormData>({
     username: '',
     email: '',
@@ -61,7 +64,12 @@ export function UsersPage() {
       setShowAddForm(false);
       setIsEditMode(false);
       setEditingUser(null);
+      setFormErrors([]);
       resetForm();
+    },
+    onError: (error) => {
+      const validationErrors = parseValidationErrors(error);
+      setFormErrors(validationErrors);
     }
   });
 
@@ -72,7 +80,12 @@ export function UsersPage() {
       setShowAddForm(false);
       setIsEditMode(false);
       setEditingUser(null);
+      setFormErrors([]);
       resetForm();
+    },
+    onError: (error) => {
+      const validationErrors = parseValidationErrors(error);
+      setFormErrors(validationErrors);
     }
   });
 
@@ -80,6 +93,11 @@ export function UsersPage() {
     mutationFn: (id: number) => usersAPI.deleteUser(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
+    },
+    onError: (error) => {
+      // For delete errors, we could show a toast or alert instead of form errors
+      const errorMessage = getGeneralErrorMessage(error);
+      alert(`Failed to delete user: ${errorMessage}`);
     }
   });
 
@@ -87,11 +105,6 @@ export function UsersPage() {
   const allUsers: User[] = Array.isArray(usersData) 
     ? usersData 
     : usersData?.items || [];
-  
-  // Debug: log the actual data structure
-  console.log('usersData:', usersData);
-  console.log('allUsers:', allUsers);
-  console.log('currentUser:', currentUser);
   
   const filteredUsers = allUsers.filter((user: User) => 
     user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -107,6 +120,7 @@ export function UsersPage() {
       role: 'member',
       password: ''
     });
+    setFormErrors([]);
   };
 
   const handleAddStart = () => {
@@ -391,6 +405,9 @@ export function UsersPage() {
                   <XMarkIcon className="h-6 w-6" />
                 </button>
               </div>
+              
+              {/* Error Display */}
+              <ErrorDisplay errors={formErrors} className="mb-4" />
               
               <form onSubmit={handleFormSubmit}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
