@@ -1,13 +1,21 @@
 {
   "name": "stocky-web",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "docker:build": "docker build -t stocky-web:latest .",
+    "docker:run": "docker run -p 3000:80 stocky-web:latest",
+    "docker:dev": "docker-compose up --build",
+    "docker:prod": "docker-compose -f docker-compose.yml up -d",
+    "docker:stop": "docker-compose down",
+    "release:build": "npm run build",
+    "release:build-strict": "npm run lint && npm run build",
+    "release:docker": "npm run release:build && npm run docker:build"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.7",

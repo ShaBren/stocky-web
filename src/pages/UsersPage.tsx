@@ -62,8 +62,9 @@ export default function UsersPage() {
 
   // Permission checks (user management typically requires admin)
   const canCreate = canPerformAction(currentUser?.role, 'create') && isAdmin;
-  const canEdit = canPerformAction(currentUser?.role, 'edit') && isAdmin;
-  const canDelete = canPerformAction(currentUser?.role, 'delete') && isAdmin;
+  // Note: canEdit and canDelete would be used for individual action buttons if implemented
+  // const canEdit = canPerformAction(currentUser?.role, 'edit') && isAdmin;
+  // const canDelete = canPerformAction(currentUser?.role, 'delete') && isAdmin;
 
   // Mutations
   const createUserMutation = useMutation({

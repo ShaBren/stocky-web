@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  stocky-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Optional: Include the backend service when ready
+  # stocky-backend:
+  #   image: stocky-backend:latest
+  #   ports:
+  #     - "8000:8000"
+  #   environment:
+  #     - DATABASE_URL=postgresql://user:pass@db:5432/stocky
+  #   depends_on:
+  #     - db
+  #   restart: unless-stopped
+
+  # Optional: Database service
+  # db:
+  #   image: postgres:15-alpine
+  #   environment:
+  #     - POSTGRES_DB=stocky
+  #     - POSTGRES_USER=stocky
+  #     - POSTGRES_PASSWORD=secure_password
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   restart: unless-stopped
+
+# volumes:
+#   postgres_data:
