@@ -52,7 +52,7 @@ export function DashboardPage() {
   const stats = [
     {
       name: 'Total Items in Inventory',
-      value: skusData?.length || 0,
+      value: skusData?.reduce((total, sku) => total + sku.quantity, 0) || 0,
       icon: CubeIcon,
       color: 'bg-blue-500'
     },
