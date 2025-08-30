@@ -3,6 +3,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { skusAPI, itemsAPI, locationsAPI } from '../services/api';
 import type { SKU, SKUFilter } from '../types/api';
 import { SearchableDropdown } from '../components/SearchableDropdown';
+import { ErrorDisplay } from '../components/ErrorDisplay';
+import { parseValidationErrors, getGeneralErrorMessage } from '../utils/errorHandling';
 import { 
   PlusIcon, 
   MagnifyingGlassIcon,
@@ -24,6 +26,7 @@ export function InventoryPage() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [sortField, setSortField] = useState<keyof SKU>('expiry_date');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [formErrors, setFormErrors] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     item_id: '',
     location_id: '',
@@ -131,6 +134,10 @@ export function InventoryPage() {
       skusAPI.updateQuantity(id, quantity),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['skus'] });
+    },
+    onError: (error) => {
+      const errorMessage = getGeneralErrorMessage(error);
+      alert(`Failed to update quantity: ${errorMessage}`);
     }
   });
 
@@ -138,6 +145,10 @@ export function InventoryPage() {
     mutationFn: (id: number) => skusAPI.deleteSKU(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['skus'] });
+    },
+    onError: (error) => {
+      const errorMessage = getGeneralErrorMessage(error);
+      alert(`Failed to delete item: ${errorMessage}`);
     }
   });
 
@@ -148,6 +159,7 @@ export function InventoryPage() {
       setShowAddForm(false);
       setIsEditMode(false);
       setEditingSku(null);
+      setFormErrors([]);
       setFormData({
         item_id: '',
         location_id: '',
@@ -157,6 +169,10 @@ export function InventoryPage() {
         low_stock_threshold: '',
         notes: ''
       });
+    },
+    onError: (error) => {
+      const validationErrors = parseValidationErrors(error);
+      setFormErrors(validationErrors);
     }
   });
 
@@ -166,6 +182,7 @@ export function InventoryPage() {
       queryClient.invalidateQueries({ queryKey: ['skus'] });
       // Close modal first, then reset state
       setShowAddForm(false);
+      setFormErrors([]);
       // Reset state after modal is closed
       setTimeout(() => {
         setIsEditMode(false);
@@ -180,6 +197,10 @@ export function InventoryPage() {
           notes: ''
         });
       }, 0);
+    },
+    onError: (error) => {
+      const validationErrors = parseValidationErrors(error);
+      setFormErrors(validationErrors);
     }
   });
 
@@ -504,6 +525,10 @@ export function InventoryPage() {
               <h3 className="text-lg font-medium text-gray-900 mb-4">
                 {isEditMode ? 'Edit Inventory Item' : 'Add Inventory Item'}
               </h3>
+              
+              {/* Error Display */}
+              <ErrorDisplay errors={formErrors} className="mb-4" />
+              
               <form onSubmit={handleFormSubmit}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>

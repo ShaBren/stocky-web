@@ -3,6 +3,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { itemsAPI } from '../services/api';
 import type { Item, ItemFilter, StorageType } from '../types/api';
 import { StorageType as StorageTypeEnum } from '../types/api';
+import { ErrorDisplay } from '../components/ErrorDisplay';
+import { parseValidationErrors, getGeneralErrorMessage } from '../utils/errorHandling';
 import { 
   PlusIcon, 
   MagnifyingGlassIcon,
@@ -24,6 +26,7 @@ export function ItemsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingItem, setEditingItem] = useState<Item | null>(null);
+  const [formErrors, setFormErrors] = useState<string[]>([]);
   const [formData, setFormData] = useState<ItemFormData>({
     name: '',
     description: '',
@@ -44,7 +47,12 @@ export function ItemsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['items'] });
       setShowAddForm(false);
+      setFormErrors([]);
       resetForm();
+    },
+    onError: (error) => {
+      const validationErrors = parseValidationErrors(error);
+      setFormErrors(validationErrors);
     }
   });
 
@@ -55,7 +63,12 @@ export function ItemsPage() {
       queryClient.invalidateQueries({ queryKey: ['items'] });
       setShowAddForm(false);
       setEditingItem(null);
+      setFormErrors([]);
       resetForm();
+    },
+    onError: (error) => {
+      const validationErrors = parseValidationErrors(error);
+      setFormErrors(validationErrors);
     }
   });
 
@@ -63,6 +76,10 @@ export function ItemsPage() {
     mutationFn: (id: number) => itemsAPI.deleteItem(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['items'] });
+    },
+    onError: (error) => {
+      const errorMessage = getGeneralErrorMessage(error);
+      alert(`Failed to delete item: ${errorMessage}`);
     }
   });
 
@@ -78,6 +95,7 @@ export function ItemsPage() {
       upc: '',
       default_storage_type: StorageTypeEnum.PANTRY
     });
+    setFormErrors([]);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -191,6 +209,10 @@ export function ItemsPage() {
           <h3 className="text-lg font-medium text-gray-900 mb-4">
             {editingItem ? 'Edit Item' : 'Add New Item'}
           </h3>
+          
+          {/* Error Display */}
+          <ErrorDisplay errors={formErrors} className="mb-4" />
+          
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>

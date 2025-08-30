@@ -3,6 +3,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { locationsAPI } from '../services/api';
 import type { Location, LocationFilter, StorageType } from '../types/api';
 import { StorageType as StorageTypeEnum } from '../types/api';
+import { ErrorDisplay } from '../components/ErrorDisplay';
+import { parseValidationErrors, getGeneralErrorMessage } from '../utils/errorHandling';
 import { 
   PlusIcon, 
   MagnifyingGlassIcon,
@@ -23,6 +25,7 @@ export function LocationsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingLocation, setEditingLocation] = useState<Location | null>(null);
+  const [formErrors, setFormErrors] = useState<string[]>([]);
   const [formData, setFormData] = useState<LocationFormData>({
     name: '',
     description: '',
@@ -42,7 +45,12 @@ export function LocationsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['locations'] });
       setShowAddForm(false);
+      setFormErrors([]);
       resetForm();
+    },
+    onError: (error) => {
+      const validationErrors = parseValidationErrors(error);
+      setFormErrors(validationErrors);
     }
   });
 
@@ -52,7 +60,12 @@ export function LocationsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['locations'] });
       setEditingLocation(null);
+      setFormErrors([]);
       resetForm();
+    },
+    onError: (error) => {
+      const validationErrors = parseValidationErrors(error);
+      setFormErrors(validationErrors);
     }
   });
 
@@ -60,6 +73,10 @@ export function LocationsPage() {
     mutationFn: (id: number) => locationsAPI.deleteLocation(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['locations'] });
+    },
+    onError: (error) => {
+      const errorMessage = getGeneralErrorMessage(error);
+      alert(`Failed to delete location: ${errorMessage}`);
     }
   });
 
@@ -74,6 +91,7 @@ export function LocationsPage() {
       description: '',
       storage_type: StorageTypeEnum.PANTRY
     });
+    setFormErrors([]);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -195,6 +213,9 @@ export function LocationsPage() {
           <h3 className="text-lg font-medium text-gray-900 mb-4">
             {editingLocation ? 'Edit Location' : 'Add New Location'}
           </h3>
+          
+          <ErrorDisplay errors={formErrors} className="mb-4" />
+          
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
