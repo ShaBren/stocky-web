@@ -30,7 +30,11 @@ export default defineConfig({
     screenshot: 'only-on-failure',
 
     /* Record video on failure */
-    video: 'retain-on-failure'
+    video: 'retain-on-failure',
+
+    /* Increase timeout for development */
+    actionTimeout: 10000,
+    navigationTimeout: 15000
   },
 
   /* Configure projects for major browsers */
@@ -53,11 +57,17 @@ export default defineConfig({
     /* Test against mobile viewports. */
     {
       name: 'Mobile Chrome',
-      use: { ...devices['Pixel 5'] },
+      use: { 
+        ...devices['Pixel 5'],
+        hasTouch: true // Enable touch support for mobile tests
+      },
     },
     {
       name: 'Mobile Safari',
-      use: { ...devices['iPhone 12'] },
+      use: { 
+        ...devices['iPhone 12'],
+        hasTouch: true // Enable touch support for mobile tests  
+      },
     },
 
     /* Test against branded browsers. */
