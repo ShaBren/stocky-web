@@ -63,6 +63,94 @@ The Docker setup uses:
 - Static asset caching (1 year)
 - HTML caching (1 hour)
 
+## Docker Compose Deployment
+
+### Prerequisites
+- Docker and Docker Compose installed
+- Backend API service running (for full functionality)
+
+### Environment Setup
+1. Copy the environment example file:
+```bash
+cp .env.example .env
+```
+
+2. Edit `.env` with your configuration:
+```bash
+# Frontend Configuration
+VITE_API_BASE_URL=http://localhost:8000/api/v1  # Your backend API URL
+VITE_APP_NAME=StockyWeb
+VITE_APP_VERSION=0.0.1
+
+# Service Ports
+WEB_PORT=3000    # Port to access the web frontend
+API_PORT=8000    # Port for backend API (if deploying together)
+DB_PORT=5432     # Port for database (if using PostgreSQL)
+
+# Backend Configuration (optional)
+DATABASE_URL=sqlite:///app/data/stocky.db
+SECRET_KEY=your-secret-key-here-change-in-production
+CORS_ORIGINS=http://localhost:3000
+```
+
+### Deployment Commands
+
+#### Frontend Only (Default)
+```bash
+# Build and start the frontend service
+docker-compose up -d stocky-web
+
+# View logs
+docker-compose logs -f stocky-web
+
+# Stop the service
+docker-compose down
+```
+
+#### Full Stack Deployment
+Uncomment the backend and database services in `docker-compose.yml`, then:
+
+```bash
+# Start all services
+docker-compose up -d
+
+# Check service status
+docker-compose ps
+
+# View all logs
+docker-compose logs -f
+
+# Stop all services
+docker-compose down
+```
+
+### Service URLs
+- **Frontend**: http://localhost:3000 (or your WEB_PORT)
+- **Backend API**: http://localhost:8000 (or your API_PORT)
+- **Database**: localhost:5432 (or your DB_PORT)
+
+### Volume Management
+```bash
+# View volumes
+docker volume ls
+
+# Backup database volume (if using PostgreSQL)
+docker run --rm -v stocky-web_postgres_data:/data -v $(pwd):/backup alpine tar czf /backup/db-backup.tar.gz -C /data .
+
+# Restore database volume
+docker run --rm -v stocky-web_postgres_data:/data -v $(pwd):/backup alpine tar xzf /backup/db-backup.tar.gz -C /data
+```
+
+### Health Checks
+The frontend container includes health checks:
+```bash
+# Check container health
+docker-compose ps
+
+# Manual health check
+curl http://localhost:3000
+```
+
 ## Production Deployment
 
 ### 1. Registry Deployment

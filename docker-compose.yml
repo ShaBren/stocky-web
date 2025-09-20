@@ -5,39 +5,66 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        # Build-time environment variables for Vite
+        - VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:8000/api/v1}
+        - VITE_APP_NAME=${VITE_APP_NAME:-StockyWeb}
+        - VITE_APP_VERSION=${VITE_APP_VERSION:-0.0.1}
+        - VITE_ENABLE_ANALYTICS=${VITE_ENABLE_ANALYTICS:-false}
+        - VITE_ENABLE_DEBUG=${VITE_ENABLE_DEBUG:-false}
+        - VITE_ENABLE_HTTPS_ONLY=${VITE_ENABLE_HTTPS_ONLY:-true}
+        - VITE_ENVIRONMENT=${VITE_ENVIRONMENT:-production}
     ports:
-      - "3000:80"
+      - "${WEB_PORT:-3000}:80"
     environment:
       - NODE_ENV=production
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
+    networks:
+      - stocky-network
 
-  # Optional: Include the backend service when ready
+  # Stocky Backend Service (uncomment when ready to deploy together)
   # stocky-backend:
   #   image: stocky-backend:latest
   #   ports:
-  #     - "8000:8000"
+  #     - "${API_PORT:-8000}:8000"
   #   environment:
-  #     - DATABASE_URL=postgresql://user:pass@db:5432/stocky
+  #     - DATABASE_URL=${DATABASE_URL:-sqlite:///app/data/stocky.db}
+  #     - SECRET_KEY=${SECRET_KEY:-your-secret-key-here}
+  #     - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000}
+  #     - DEBUG=${DEBUG:-false}
+  #   volumes:
+  #     - backend_data:/app/data
   #   depends_on:
   #     - db
   #   restart: unless-stopped
+  #   networks:
+  #     - stocky-network
 
-  # Optional: Database service
+  # Database Service (uncomment for PostgreSQL)
   # db:
   #   image: postgres:15-alpine
   #   environment:
-  #     - POSTGRES_DB=stocky
-  #     - POSTGRES_USER=stocky
-  #     - POSTGRES_PASSWORD=secure_password
+  #     - POSTGRES_DB=${POSTGRES_DB:-stocky}
+  #     - POSTGRES_USER=${POSTGRES_USER:-stocky}
+  #     - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-secure_password}
   #   volumes:
   #     - postgres_data:/var/lib/postgresql/data
+  #   ports:
+  #     - "${DB_PORT:-5432}:5432"
   #   restart: unless-stopped
+  #   networks:
+  #     - stocky-network
 
-# volumes:
-#   postgres_data:
+networks:
+  stocky-network:
+    driver: bridge
+
+volumes:
+  backend_data:
+  # postgres_data:
