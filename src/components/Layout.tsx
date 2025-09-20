@@ -13,7 +13,8 @@ import {
   UsersIcon,
   ArrowRightOnRectangleIcon,
   UserIcon,
-  ArchiveBoxIcon
+  ArchiveBoxIcon,
+  CogIcon
 } from '@heroicons/react/24/outline';
 
 interface LayoutProps {
@@ -29,6 +30,7 @@ const iconMap = {
   QrCodeIcon,
   BellIcon,
   UsersIcon,
+  CogIcon,
 };
 
 export function Layout({ onLogout }: LayoutProps) {

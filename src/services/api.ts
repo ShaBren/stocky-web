@@ -11,7 +11,9 @@ import type {
   PaginatedResponse,
   ItemFilter,
   SKUFilter,
-  LocationFilter
+  LocationFilter,
+  BackupResponse,
+  ImportResponse
 } from '../types/api';
 
 // Authentication API
@@ -214,6 +216,65 @@ export const logsAPI = {
 export const healthAPI = {
   check: async (): Promise<{ status: string; service: string }> => {
     const response = await api.get('/health/');
+    return response.data;
+  }
+};
+
+// Backup API (Admin Only)
+export const backupAPI = {
+  // Create full backup and return metadata
+  createFullBackup: async (): Promise<BackupResponse> => {
+    const response = await api.post('/backup/create/full/');
+    return response.data;
+  },
+
+  // Create and download full backup as file
+  downloadFullBackup: async (): Promise<Blob> => {
+    const response = await api.post('/backup/create/full/download/', {}, {
+      responseType: 'blob'
+    });
+    return response.data;
+  },
+
+  // Import partial backup from base64 data
+  importPartialBackup: async (backupData: string, force = false): Promise<ImportResponse> => {
+    const response = await api.post('/backup/import/partial/', {
+      backup_data: backupData,
+      force
+    });
+    return response.data;
+  },
+
+  // Import full backup from base64 data (destructive)
+  importFullBackup: async (backupData: string, force = true): Promise<ImportResponse> => {
+    const response = await api.post('/backup/import/full/', {
+      backup_data: backupData,
+      force
+    });
+    return response.data;
+  },
+
+  // Upload and import partial backup from file
+  uploadPartialBackup: async (file: File, force = false): Promise<ImportResponse> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('force', force.toString());
+
+    const response = await api.post('/backup/upload/import/partial/', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data;
+  },
+
+  // Upload and import full backup from file (destructive)
+  uploadFullBackup: async (file: File, force = true): Promise<ImportResponse> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('force', force.toString());
+
+    const response = await api.post('/backup/upload/import/full/', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
     return response.data;
   }
 };

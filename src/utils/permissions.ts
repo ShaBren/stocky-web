@@ -24,11 +24,14 @@ export const ROLE_PERMISSIONS = {
     canAccessScanner: true,
     canAccessAlerts: true,
     canAccessDashboard: true,
+    canAccessAdmin: true,
     canCreate: true,
     canEdit: true,
     canDelete: true,
     canManageUsers: true,
     canChangeOwnProfile: true,
+    canBackupData: true,
+    canRestoreData: true,
   },
   member: {
     // Full access except user management
@@ -39,11 +42,14 @@ export const ROLE_PERMISSIONS = {
     canAccessScanner: true,
     canAccessAlerts: true,
     canAccessDashboard: true,
+    canAccessAdmin: false,
     canCreate: true,
     canEdit: true,
     canDelete: true,
     canManageUsers: false,
     canChangeOwnProfile: true,
+    canBackupData: false,
+    canRestoreData: false,
   },
   scanner: {
     // Only scanner access
@@ -54,11 +60,14 @@ export const ROLE_PERMISSIONS = {
     canAccessScanner: true,
     canAccessAlerts: false,
     canAccessDashboard: false,
+    canAccessAdmin: false,
     canCreate: false,
     canEdit: false,
     canDelete: false,
     canManageUsers: false,
     canChangeOwnProfile: true,
+    canBackupData: false,
+    canRestoreData: false,
   },
   read_only: {
     // Read access only, no scanner or users
@@ -69,11 +78,14 @@ export const ROLE_PERMISSIONS = {
     canAccessScanner: false,
     canAccessAlerts: true,
     canAccessDashboard: true,
+    canAccessAdmin: false,
     canCreate: false,
     canEdit: false,
     canDelete: false,
     canManageUsers: false,
     canChangeOwnProfile: true,
+    canBackupData: false,
+    canRestoreData: false,
   },
 } as const;
 
@@ -109,6 +121,8 @@ export function canAccessPage(userRole: UserRole | undefined, page: string): boo
       return hasPermission(userRole, 'canAccessAlerts');
     case 'users':
       return hasPermission(userRole, 'canAccessUsers');
+    case 'admin':
+      return hasPermission(userRole, 'canAccessAdmin');
     default:
       return false;
   }
@@ -217,6 +231,12 @@ export function getNavigationItems(userRole: UserRole | undefined) {
       href: '/users',
       icon: 'UsersIcon',
       show: canAccessPage(userRole, 'users'),
+    },
+    {
+      name: 'Admin',
+      href: '/admin',
+      icon: 'CogIcon',
+      show: canAccessPage(userRole, 'admin'),
     },
   ];
 

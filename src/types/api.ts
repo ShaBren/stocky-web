@@ -145,3 +145,29 @@ export interface LocationFilter {
   page?: number;
   size?: number;
 }
+
+// Backup and Restore Types
+export interface BackupResponse {
+  backup_size: number;
+  timestamp: string;
+  tables_included: string[];
+  message: string;
+}
+
+export interface ImportRequest {
+  backup_data: string; // base64-encoded-gzipped-sql-data
+  force: boolean;
+}
+
+export interface ImportResponse {
+  success: boolean;
+  message: string;
+  tables_affected: string[];
+  records_imported: number;
+  timestamp: string;
+}
+
+export interface BackupUploadData {
+  file: File;
+  force?: boolean;
+}

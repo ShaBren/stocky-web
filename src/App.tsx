@@ -11,6 +11,7 @@ import LocationsPage from './pages/LocationsPage';
 import ScannerPage from './pages/ScannerPage';
 import AlertsPage from './pages/AlertsPage';
 import UsersPage from './pages/UsersPage';
+import AdminPage from './pages/AdminPage';
 import { setAuthToken } from './lib/api';
 import { authAPI } from './services/api';
 
@@ -128,6 +129,7 @@ function App() {
                 <Route path="/scanner" element={<ScannerPage />} />
                 <Route path="/alerts" element={<AlertsPage />} />
                 <Route path="/users" element={<UsersPage />} />
+                <Route path="/admin" element={<AdminPage />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Route>
             </Routes>
