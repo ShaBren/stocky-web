@@ -273,7 +273,7 @@ export const backupAPI = {
 
     const response = await api.post('/backup/upload/import/full/', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
-      params: { force: true } // Always send force=true as query parameter
+      params: { force } // Use the force parameter
     });
     return response.data;
   }
