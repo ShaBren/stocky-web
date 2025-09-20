@@ -258,7 +258,7 @@ export const backupAPI = {
   uploadPartialBackup: async (file: File, force = false): Promise<ImportResponse> => {
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('force', force.toString());
+    formData.append('force', force ? 'true' : 'false');
 
     const response = await api.post('/backup/upload/import/partial/', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
@@ -270,7 +270,8 @@ export const backupAPI = {
   uploadFullBackup: async (file: File, force = true): Promise<ImportResponse> => {
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('force', force.toString());
+    // Always require force=true for full restore - explicitly set as string
+    formData.append('force', 'true');
 
     const response = await api.post('/backup/upload/import/full/', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
