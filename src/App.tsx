@@ -12,7 +12,8 @@ import ScannerPage from './pages/ScannerPage';
 import AlertsPage from './pages/AlertsPage';
 import UsersPage from './pages/UsersPage';
 import AdminPage from './pages/AdminPage';
-import { setAuthToken } from './lib/api';
+import { setAuthToken, initializeApi } from './lib/api';
+import { loadRuntimeConfig } from './lib/runtime-config';
 import { authAPI } from './services/api';
 
 // Create a client
@@ -30,30 +31,46 @@ function App() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    // Check for existing token
-    const token = localStorage.getItem('stocky_auth_token');
-    if (token) {
+    // Load runtime configuration first, then initialize app
+    const initializeApp = async () => {
       try {
-        const decoded: any = jwtDecode(token);
-        const currentTime = Date.now() / 1000;
+        // Load runtime configuration
+        await loadRuntimeConfig();
         
-        // Check if token is still valid (not expired)
-        if (decoded.exp > currentTime) {
-          setAuthToken(token);
-          setIsAuthenticated(true);
-          
-          // Set up periodic token refresh
-          setupTokenRefresh(decoded.exp);
-        } else {
-          // Token is expired, remove it
-          localStorage.removeItem('stocky_auth_token');
+        // Initialize API client with runtime config
+        initializeApi();
+        
+        // Check for existing token
+        const token = localStorage.getItem('stocky_auth_token');
+        if (token) {
+          try {
+            const decoded: any = jwtDecode(token);
+            const currentTime = Date.now() / 1000;
+            
+            // Check if token is still valid (not expired)
+            if (decoded.exp > currentTime) {
+              setAuthToken(token);
+              setIsAuthenticated(true);
+              
+              // Set up periodic token refresh
+              setupTokenRefresh(decoded.exp);
+            } else {
+              // Token is expired, remove it
+              localStorage.removeItem('stocky_auth_token');
+            }
+          } catch (error) {
+            // Invalid token, remove it
+            localStorage.removeItem('stocky_auth_token');
+          }
         }
       } catch (error) {
-        // Invalid token, remove it
-        localStorage.removeItem('stocky_auth_token');
+        console.error('Failed to initialize app:', error);
+      } finally {
+        setIsLoading(false);
       }
-    }
-    setIsLoading(false);
+    };
+
+    initializeApp();
   }, []);
 
   // Set up automatic token refresh

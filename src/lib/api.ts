@@ -1,12 +1,13 @@
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
+import { getApiBaseUrl } from './runtime-config';
 
-// API Configuration
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
+// API Configuration - will be set after runtime config loads
+let API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
 const TOKEN_REFRESH_BUFFER = 300; // 5 minutes before expiry
 const ENABLE_AUTO_REFRESH = true; // Can be disabled if backend doesn't support refresh
 
-// Create axios instance
+// Create axios instance - will be reconfigured after runtime config loads
 export const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,
@@ -14,6 +15,16 @@ export const api = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+/**
+ * Initialize API with runtime configuration
+ * Must be called after runtime config is loaded
+ */
+export function initializeApi(): void {
+  API_BASE_URL = getApiBaseUrl();
+  api.defaults.baseURL = API_BASE_URL;
+  console.log('🔗 API client reconfigured with base URL:', API_BASE_URL);
+}
 
 // Token management
 let authToken: string | null = localStorage.getItem('stocky_auth_token');

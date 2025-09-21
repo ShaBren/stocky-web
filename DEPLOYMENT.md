@@ -28,6 +28,91 @@ npm run docker:build
 npm run docker:run
 ```
 
+## Runtime Configuration
+
+StockyWeb supports runtime configuration, allowing you to deploy the same Docker image to different environments without rebuilding. The application will load configuration from `/config.js` at runtime, which is automatically generated from environment variables.
+
+### Environment Variables
+
+#### Build-time Variables (Optional Fallbacks)
+These are used during the Docker build process and serve as fallbacks if runtime variables are not provided:
+
+- `VITE_API_BASE_URL` - Default API endpoint
+- `VITE_APP_NAME` - Application name  
+- `VITE_APP_VERSION` - Application version
+- `VITE_ENABLE_ANALYTICS` - Enable analytics (true/false)
+- `VITE_ENABLE_DEBUG` - Enable debug mode (true/false)
+- `VITE_ENABLE_HTTPS_ONLY` - Enforce HTTPS (true/false)
+- `VITE_ENVIRONMENT` - Environment name
+
+#### Runtime Variables (Recommended)
+These take precedence over build-time variables and allow the same image to work in different environments:
+
+- `RUNTIME_API_BASE_URL` - API endpoint for this deployment
+- `RUNTIME_APP_NAME` - Application name for this deployment
+- `RUNTIME_APP_VERSION` - Application version for this deployment  
+- `RUNTIME_ENABLE_ANALYTICS` - Enable analytics for this deployment
+- `RUNTIME_ENABLE_DEBUG` - Enable debug mode for this deployment
+- `RUNTIME_ENABLE_HTTPS_ONLY` - Enforce HTTPS for this deployment
+- `RUNTIME_ENVIRONMENT` - Environment name for this deployment
+
+### Deployment Examples
+
+#### Development Environment
+```bash
+docker run -d -p 3000:80 \
+  -e RUNTIME_API_BASE_URL=http://localhost:8000/api/v1 \
+  -e RUNTIME_ENVIRONMENT=development \
+  -e RUNTIME_ENABLE_DEBUG=true \
+  stocky-web:latest
+```
+
+#### Staging Environment  
+```bash
+docker run -d -p 3000:80 \
+  -e RUNTIME_API_BASE_URL=https://api-staging.yourdomain.com/api/v1 \
+  -e RUNTIME_ENVIRONMENT=staging \
+  -e RUNTIME_ENABLE_DEBUG=true \
+  stocky-web:latest
+```
+
+#### Production Environment
+```bash
+docker run -d -p 3000:80 \
+  -e RUNTIME_API_BASE_URL=https://api.yourdomain.com/api/v1 \
+  -e RUNTIME_ENVIRONMENT=production \
+  -e RUNTIME_ENABLE_DEBUG=false \
+  -e RUNTIME_ENABLE_HTTPS_ONLY=true \
+  stocky-web:latest
+```
+
+#### Using Docker Compose
+Create environment-specific `.env` files:
+
+**.env.development**
+```env
+RUNTIME_API_BASE_URL=http://localhost:8000/api/v1
+RUNTIME_ENVIRONMENT=development
+RUNTIME_ENABLE_DEBUG=true
+```
+
+**.env.production**
+```env
+RUNTIME_API_BASE_URL=https://api.yourdomain.com/api/v1  
+RUNTIME_ENVIRONMENT=production
+RUNTIME_ENABLE_DEBUG=false
+RUNTIME_ENABLE_HTTPS_ONLY=true
+```
+
+Then deploy:
+```bash
+# Development
+docker-compose --env-file .env.development up -d
+
+# Production  
+docker-compose --env-file .env.production up -d
+```
+
 #### Option 3: Release Script
 ```bash
 # Complete release build with validation

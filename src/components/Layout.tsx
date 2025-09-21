@@ -88,7 +88,7 @@ export function Layout({ onLogout }: LayoutProps) {
             <div className="p-3 border-t border-gray-200">
               <div className="flex items-center mb-3">
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-900">{currentUser.full_name}</p>
+                  <p className="text-sm font-medium text-gray-900">{currentUser.username}</p>
                   <p className="text-xs text-gray-500">@{currentUser.username}</p>
                   <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getRoleBadgeColor(currentUser.role)}`}>
                     {getRoleName(currentUser.role)}

@@ -3,8 +3,7 @@ export interface User {
   id: number;
   username: string;
   email: string;
-  full_name: string;
-  role: 'admin' | 'member' | 'scanner' | 'read_only';
+  role: 'ADMIN' | 'MEMBER';
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -15,9 +14,10 @@ export interface Item {
   name: string;
   description?: string;
   upc?: string;
-  default_storage_type: StorageType;
+  default_storage_type?: StorageType;
   is_active: boolean;
-  created_by: number;
+  uda_fetched: boolean;
+  uda_fetch_attempted: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -28,7 +28,6 @@ export interface Location {
   description?: string;
   storage_type: StorageType;
   is_active: boolean;
-  created_by: number;
   created_at: string;
   updated_at: string;
 }
@@ -38,13 +37,10 @@ export interface SKU {
   item_id: number;
   location_id: number;
   quantity: number;
-  unit: string;
+  unit?: string;
   expiry_date?: string;
-  purchase_date?: string;
-  purchase_price?: number;
   notes?: string;
-  low_stock_threshold?: number;
-  created_by: number;
+  is_active: boolean;
   created_at: string;
   updated_at: string;
   item?: Item;
@@ -103,7 +99,10 @@ export interface LoginRequest {
 export interface LoginResponse {
   access_token: string;
   token_type: string;
-  user: User;
+  expires_in: number;
+  user_id: number;
+  role: 'ADMIN' | 'MEMBER';
+  refresh_token: string;
 }
 
 export interface PaginatedResponse<T> {

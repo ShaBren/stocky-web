@@ -5,8 +5,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      # Keep build args as fallbacks for non-runtime scenarios
       args:
-        # Build-time environment variables for Vite
         - VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:8000/api/v1}
         - VITE_APP_NAME=${VITE_APP_NAME:-StockyWeb}
         - VITE_APP_VERSION=${VITE_APP_VERSION:-0.0.1}
@@ -17,7 +17,14 @@ services:
     ports:
       - "${WEB_PORT:-3000}:80"
     environment:
-      - NODE_ENV=production
+      # Runtime configuration (takes precedence over build-time config)
+      - RUNTIME_API_BASE_URL=${RUNTIME_API_BASE_URL:-${VITE_API_BASE_URL:-http://localhost:8000/api/v1}}
+      - RUNTIME_APP_NAME=${RUNTIME_APP_NAME:-${VITE_APP_NAME:-StockyWeb}}
+      - RUNTIME_APP_VERSION=${RUNTIME_APP_VERSION:-${VITE_APP_VERSION:-0.0.1}}
+      - RUNTIME_ENABLE_ANALYTICS=${RUNTIME_ENABLE_ANALYTICS:-${VITE_ENABLE_ANALYTICS:-false}}
+      - RUNTIME_ENABLE_DEBUG=${RUNTIME_ENABLE_DEBUG:-${VITE_ENABLE_DEBUG:-false}}
+      - RUNTIME_ENABLE_HTTPS_ONLY=${RUNTIME_ENABLE_HTTPS_ONLY:-${VITE_ENABLE_HTTPS_ONLY:-true}}
+      - RUNTIME_ENVIRONMENT=${RUNTIME_ENVIRONMENT:-${VITE_ENVIRONMENT:-production}}
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost"]

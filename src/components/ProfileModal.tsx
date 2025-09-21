@@ -4,15 +4,7 @@ import { authAPI } from '../services/api';
 import { ErrorDisplay } from './ErrorDisplay';
 import { parseValidationErrors } from '../utils/errorHandling';
 import { XMarkIcon } from '@heroicons/react/24/outline';
-
-interface User {
-  id: number;
-  username: string;
-  email: string;
-  full_name: string;
-  role: string;
-  is_active: boolean;
-}
+import type { User } from '../types/api';
 
 interface ProfileModalProps {
   user: User;
@@ -22,7 +14,6 @@ interface ProfileModalProps {
 
 interface ProfileFormData {
   email: string;
-  full_name: string;
   current_password: string;
   new_password: string;
   confirm_password: string;
@@ -32,7 +23,6 @@ export function ProfileModal({ user, isOpen, onClose }: ProfileModalProps) {
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState<ProfileFormData>({
     email: user.email,
-    full_name: user.full_name,
     current_password: '',
     new_password: '',
     confirm_password: '',
@@ -81,7 +71,6 @@ export function ProfileModal({ user, isOpen, onClose }: ProfileModalProps) {
     // Prepare data to send
     const updateData: Partial<ProfileFormData> = {
       email: formData.email,
-      full_name: formData.full_name,
     };
 
     if (isChangingPassword) {
@@ -95,7 +84,6 @@ export function ProfileModal({ user, isOpen, onClose }: ProfileModalProps) {
   const resetForm = () => {
     setFormData({
       email: user.email,
-      full_name: user.full_name,
       current_password: '',
       new_password: '',
       confirm_password: '',
@@ -145,21 +133,6 @@ export function ProfileModal({ user, isOpen, onClose }: ProfileModalProps) {
               <p className="text-sm text-gray-500 mt-1">
                 Username cannot be changed
               </p>
-            </div>
-
-            <div>
-              <label htmlFor="full_name" className="stocky-label">
-                Full Name *
-              </label>
-              <input
-                type="text"
-                id="full_name"
-                name="full_name"
-                value={formData.full_name}
-                onChange={handleInputChange}
-                required
-                className="stocky-input"
-              />
             </div>
 
             <div>

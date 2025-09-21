@@ -20,8 +20,7 @@ import {
 interface UserFormData {
   username: string;
   email: string;
-  full_name: string;
-  role: 'admin' | 'member' | 'scanner' | 'read_only';
+  role: 'ADMIN' | 'MEMBER';
   password?: string;
 }
 
@@ -37,8 +36,7 @@ export default function UsersPage() {
   const [formData, setFormData] = useState<UserFormData>({
     username: '',
     email: '',
-    full_name: '',
-    role: 'member',
+    role: 'MEMBER',
     password: ''
   });
 
@@ -54,11 +52,11 @@ export default function UsersPage() {
     queryKey: ['users'],
     queryFn: () => usersAPI.getUsers(1, 100), // Get first 100 users
     retry: 1,
-    enabled: currentUser?.role === 'admin' // Only fetch if user is admin
+    enabled: currentUser?.role === 'ADMIN' // Only fetch if user is admin
   });
 
   // Check if current user is admin
-  const isAdmin = currentUser?.role === 'admin';
+  const isAdmin = currentUser?.role === 'ADMIN';
 
   // Permission checks (user management typically requires admin)
   const canCreate = canPerformAction(currentUser?.role, 'create') && isAdmin;
@@ -118,16 +116,14 @@ export default function UsersPage() {
   
   const filteredUsers = allUsers.filter((user: User) => 
     user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.full_name.toLowerCase().includes(searchTerm.toLowerCase())
+    user.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const resetForm = () => {
     setFormData({
       username: '',
       email: '',
-      full_name: '',
-      role: 'member',
+      role: 'MEMBER',
       password: ''
     });
     setFormErrors([]);
@@ -146,7 +142,6 @@ export default function UsersPage() {
     setFormData({
       username: user.username,
       email: user.email,
-      full_name: user.full_name,
       role: user.role,
       password: '' // Don't pre-fill password for security
     });
@@ -159,7 +154,6 @@ export default function UsersPage() {
     const submitData: any = {
       username: formData.username,
       email: formData.email,
-      full_name: formData.full_name,
       role: formData.role
     };
 
@@ -334,10 +328,10 @@ export default function UsersPage() {
                         </div>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">
-                            {user.full_name}
+                            {user.username}
                           </div>
                           <div className="text-sm text-gray-500">
-                            {user.username} • {user.email}
+                            {user.email}
                           </div>
                         </div>
                       </div>
@@ -453,21 +447,6 @@ export default function UsersPage() {
                       placeholder="Enter email"
                     />
                   </div>
-                  <div className="md:col-span-2">
-                    <label htmlFor="full_name" className="stocky-label">
-                      Full Name *
-                    </label>
-                    <input
-                      type="text"
-                      id="full_name"
-                      name="full_name"
-                      value={formData.full_name}
-                      onChange={handleInputChange}
-                      required
-                      className="stocky-input"
-                      placeholder="Enter full name"
-                    />
-                  </div>
                   <div>
                     <label htmlFor="role" className="stocky-label">
                       Role *
@@ -480,10 +459,8 @@ export default function UsersPage() {
                       required
                       className="stocky-input"
                     >
-                      <option value="member">Member</option>
-                      <option value="admin">Admin</option>
-                      <option value="scanner">Scanner</option>
-                      <option value="read_only">Read Only</option>
+                      <option value="MEMBER">Member</option>
+                      <option value="ADMIN">Admin</option>
                     </select>
                   </div>
                   <div>
