@@ -9,8 +9,7 @@ vi.mock('../../../src/services/api', () => ({
       id: 1,
       email: 'test@example.com',
       username: 'testuser',
-      full_name: 'Test User',
-      role: 'admin',
+      role: 'ADMIN',
       is_active: true,
       created_at: '2025-01-01T00:00:00Z',
       updated_at: '2025-01-01T00:00:00Z'
@@ -59,11 +58,11 @@ describe('Layout Component', () => {
     
     // Wait for user data to load
     await waitFor(() => {
-      expect(screen.getByText('Test User')).toBeInTheDocument()
+      expect(screen.getByText('testuser')).toBeInTheDocument()
     })
     
     // Check for user profile elements
-    expect(screen.getByText('Test User')).toBeInTheDocument()
+    expect(screen.getByText('testuser')).toBeInTheDocument()
     expect(screen.getByText('@testuser')).toBeInTheDocument()
     expect(screen.getByText('Administrator')).toBeInTheDocument()
   })
