@@ -17,10 +17,9 @@ export default function DashboardPage() {
     retry: 1
   });
 
-  // Filter low stock SKUs
+  // Filter low stock SKUs (using quantity <= 5 as threshold)
   const lowStockData = skusData?.filter(sku => {
-    // Only consider items low stock if they have a threshold AND quantity is below it
-    return sku.low_stock_threshold != null && sku.quantity <= sku.low_stock_threshold;
+    return sku.quantity <= 5;
   }) || [];
 
   const { data: itemsData } = useQuery({
@@ -124,7 +123,7 @@ export default function DashboardPage() {
                       {sku.quantity} {sku.unit}
                     </p>
                     <p className="text-xs text-gray-500">
-                      Threshold: {sku.low_stock_threshold}
+                      Low Stock Alert
                     </p>
                   </div>
                 </div>

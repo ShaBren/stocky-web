@@ -37,7 +37,6 @@ export default function InventoryPage() {
     quantity: '',
     unit: '',
     expiry_date: '',
-    low_stock_threshold: '',
     notes: ''
   });
 
@@ -78,7 +77,10 @@ export default function InventoryPage() {
   const locationsMap = new Map(locationsData?.map(location => [location.id, location]) || []);
 
   // Extract unique units from existing SKUs
-  const availableUnits = Array.from(new Set(skusData?.map(sku => sku.unit).filter(Boolean) || [])).sort();
+  const availableUnits = Array.from(new Set(
+    skusData?.map(sku => sku.unit)
+      .filter((unit): unit is string => Boolean(unit)) || []
+  )).sort();
 
   // Client-side filtering
   const filteredSKUs = skusData ? skusData.filter(sku => {
@@ -91,7 +93,7 @@ export default function InventoryPage() {
       const matchesItem = item?.name.toLowerCase().includes(searchLower) || 
                          item?.description?.toLowerCase().includes(searchLower);
       const matchesLocation = location?.name.toLowerCase().includes(searchLower);
-      const matchesUnit = sku.unit.toLowerCase().includes(searchLower);
+      const matchesUnit = sku.unit?.toLowerCase().includes(searchLower) || false;
       
       if (!matchesItem && !matchesLocation && !matchesUnit) {
         return false;
@@ -103,9 +105,9 @@ export default function InventoryPage() {
       return false;
     }
     
-    // Low stock filter
+    // Low stock filter (using quantity <= 5 as threshold)
     if (lowStockFilter) {
-      const isLowStock = sku.low_stock_threshold && sku.quantity <= sku.low_stock_threshold;
+      const isLowStock = sku.quantity <= 5;
       if (!isLowStock) {
         return false;
       }
@@ -182,7 +184,6 @@ export default function InventoryPage() {
         quantity: '',
         unit: '',
         expiry_date: '',
-        low_stock_threshold: '',
         notes: ''
       });
     },
@@ -209,7 +210,6 @@ export default function InventoryPage() {
           quantity: '',
           unit: '',
           expiry_date: '',
-          low_stock_threshold: '',
           notes: ''
         });
       }, 0);
@@ -241,7 +241,6 @@ export default function InventoryPage() {
       quantity: Number(formData.quantity),
       unit: formData.unit,
       expiry_date: formData.expiry_date || null,
-      low_stock_threshold: formData.low_stock_threshold ? parseInt(formData.low_stock_threshold) : null,
       notes: formData.notes || null
     };
 
@@ -250,7 +249,6 @@ export default function InventoryPage() {
       const updateData = {
         ...submitData,
         expiry_date: formData.expiry_date || undefined, // Use undefined for edit
-        low_stock_threshold: formData.low_stock_threshold ? parseInt(formData.low_stock_threshold) : undefined,
         notes: formData.notes || undefined
       };
       updateSKUMutation.mutate({ id: editingSku.id, data: updateData });
@@ -275,9 +273,8 @@ export default function InventoryPage() {
       item_id: String(sku.item_id),
       location_id: String(sku.location_id),
       quantity: String(sku.quantity),
-      unit: sku.unit,
+      unit: sku.unit || '',
       expiry_date: sku.expiry_date || '',
-      low_stock_threshold: sku.low_stock_threshold ? String(sku.low_stock_threshold) : '',
       notes: sku.notes || ''
     });
     setShowAddForm(true); // Reuse the same modal
@@ -292,7 +289,6 @@ export default function InventoryPage() {
       quantity: '',
       unit: '',
       expiry_date: '',
-      low_stock_threshold: '',
       notes: ''
     });
     setShowAddForm(true);
@@ -315,7 +311,7 @@ export default function InventoryPage() {
   };
 
   const isLowStock = (sku: SKU) => {
-    return sku.low_stock_threshold && sku.quantity <= sku.low_stock_threshold;
+    return sku.quantity <= 5; // Use fixed threshold of 5
   };
 
   if (skusLoading) {
@@ -639,22 +635,6 @@ export default function InventoryPage() {
                       value={formData.expiry_date}
                       onChange={handleInputChange}
                       className="stocky-input"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="low_stock_threshold" className="stocky-label">
-                      Low Stock Threshold
-                    </label>
-                    <input
-                      type="number"
-                      id="low_stock_threshold"
-                      name="low_stock_threshold"
-                      value={formData.low_stock_threshold}
-                      onChange={handleInputChange}
-                      min="0"
-                      step="1"
-                      className="stocky-input"
-                      placeholder="0"
                     />
                   </div>
                 </div>

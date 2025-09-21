@@ -129,7 +129,7 @@ export default function ItemsPage() {
       name: item.name,
       description: item.description || '',
       upc: item.upc || '',
-      default_storage_type: item.default_storage_type
+      default_storage_type: item.default_storage_type || 'pantry'
     });
     setShowAddForm(true);
   };
@@ -360,7 +360,7 @@ export default function ItemsPage() {
                     {item.upc || '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {storageTypeLabels[item.default_storage_type]}
+                    {item.default_storage_type ? storageTypeLabels[item.default_storage_type] : '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
