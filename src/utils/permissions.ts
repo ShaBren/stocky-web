@@ -50,17 +50,25 @@ export type Permission = keyof typeof ROLE_PERMISSIONS.ADMIN;
 /**
  * Check if a user role has a specific permission
  */
-export function hasPermission(userRole: UserRole | undefined, permission: Permission): boolean {
-  if (!userRole || !ROLE_PERMISSIONS[userRole]) {
+export function hasPermission(userRole: UserRole | string | undefined, permission: Permission): boolean {
+  if (!userRole) {
     return false;
   }
-  return ROLE_PERMISSIONS[userRole][permission] || false;
+  
+  // Normalize role to uppercase to handle API responses that might be lowercase
+  const normalizedRole = userRole.toString().toUpperCase() as UserRole;
+  
+  if (!ROLE_PERMISSIONS[normalizedRole]) {
+    return false;
+  }
+  
+  return ROLE_PERMISSIONS[normalizedRole][permission] || false;
 }
 
 /**
  * Get navigation items based on user permissions
  */
-export function getNavigationItems(userRole: UserRole | undefined) {
+export function getNavigationItems(userRole: UserRole | string | undefined) {
   const items = [];
 
   if (hasPermission(userRole, 'canAccessDashboard')) {
@@ -105,8 +113,11 @@ export function getNavigationItems(userRole: UserRole | undefined) {
 /**
  * Get display name for a user role
  */
-export function getRoleName(role: UserRole | undefined): string {
-  switch (role) {
+export function getRoleName(role: UserRole | string | undefined): string {
+  if (!role) return 'Unknown';
+  
+  const normalizedRole = role.toString().toUpperCase();
+  switch (normalizedRole) {
     case 'ADMIN':
       return 'Administrator';
     case 'MEMBER':
@@ -119,8 +130,11 @@ export function getRoleName(role: UserRole | undefined): string {
 /**
  * Get CSS classes for role badge
  */
-export function getRoleBadgeColor(role: UserRole | undefined): string {
-  switch (role) {
+export function getRoleBadgeColor(role: UserRole | string | undefined): string {
+  if (!role) return 'bg-gray-100 text-gray-800';
+  
+  const normalizedRole = role.toString().toUpperCase();
+  switch (normalizedRole) {
     case 'ADMIN':
       return 'bg-red-100 text-red-800';
     case 'MEMBER':
@@ -134,7 +148,7 @@ export function getRoleBadgeColor(role: UserRole | undefined): string {
  * Check if user can perform a specific action (create, edit, delete)
  */
 export function canPerformAction(
-  userRole: UserRole | undefined,
+  userRole: UserRole | string | undefined,
   action: 'create' | 'edit' | 'delete'
 ): boolean {
   switch (action) {
