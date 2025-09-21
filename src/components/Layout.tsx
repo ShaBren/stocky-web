@@ -14,7 +14,9 @@ import {
   ArrowRightOnRectangleIcon,
   UserIcon,
   ArchiveBoxIcon,
-  CogIcon
+  CogIcon,
+  TagIcon,
+  ArrowsRightLeftIcon
 } from '@heroicons/react/24/outline';
 
 interface LayoutProps {
@@ -31,6 +33,8 @@ const iconMap = {
   BellIcon,
   UsersIcon,
   CogIcon,
+  TagIcon,
+  ArrowsRightLeftIcon,
 };
 
 export function Layout({ onLogout }: LayoutProps) {

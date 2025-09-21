@@ -80,7 +80,7 @@ export function getNavigationItems(userRole: UserRole | undefined) {
   }
 
   if (hasPermission(userRole, 'canAccessBulkMove')) {
-    items.push({ name: 'Bulk Move', href: '/bulk-move', icon: 'ArrowRightLeftIcon' });
+    items.push({ name: 'Bulk Move', href: '/bulk-move', icon: 'ArrowsRightLeftIcon' });
   }
 
   if (hasPermission(userRole, 'canAccessScanner')) {
