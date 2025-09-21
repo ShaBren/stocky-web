@@ -14,6 +14,7 @@ export const ROLE_PERMISSIONS = {
     canAccessAlerts: true,
     canAccessDashboard: true,
     canAccessAdmin: true,
+    canAccessBulkMove: true,
     canCreate: true,
     canEdit: true,
     canDelete: true,
@@ -32,6 +33,7 @@ export const ROLE_PERMISSIONS = {
     canAccessAlerts: true,
     canAccessDashboard: true,
     canAccessAdmin: false,
+    canAccessBulkMove: false,
     canCreate: true,
     canEdit: true,
     canDelete: true,
@@ -75,6 +77,10 @@ export function getNavigationItems(userRole: UserRole | undefined) {
 
   if (hasPermission(userRole, 'canAccessLocations')) {
     items.push({ name: 'Locations', href: '/locations', icon: 'MapPinIcon' });
+  }
+
+  if (hasPermission(userRole, 'canAccessBulkMove')) {
+    items.push({ name: 'Bulk Move', href: '/bulk-move', icon: 'ArrowRightLeftIcon' });
   }
 
   if (hasPermission(userRole, 'canAccessScanner')) {

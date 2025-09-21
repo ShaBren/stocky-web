@@ -11,6 +11,7 @@ import LocationsPage from './pages/LocationsPage';
 import ScannerPage from './pages/ScannerPage';
 import AlertsPage from './pages/AlertsPage';
 import UsersPage from './pages/UsersPage';
+import BulkMovePage from './pages/BulkMovePage';
 import AdminPage from './pages/AdminPage';
 import { setAuthToken, initializeApi } from './lib/api';
 import { loadRuntimeConfig } from './lib/runtime-config';
@@ -146,6 +147,7 @@ function App() {
                 <Route path="/scanner" element={<ScannerPage />} />
                 <Route path="/alerts" element={<AlertsPage />} />
                 <Route path="/users" element={<UsersPage />} />
+                <Route path="/bulk-move" element={<BulkMovePage />} />
                 <Route path="/admin" element={<AdminPage />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Route>
