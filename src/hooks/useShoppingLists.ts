@@ -152,3 +152,40 @@ export function useRemoveShoppingListItem() {
     },
   });
 }
+
+// Add item to shopping list
+export function useAddItemToShoppingList() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ listId, itemData }: { listId: number; itemData: ShoppingListItemCreate }) =>
+      shoppingListsAPI.addItem(listId, itemData),
+    onSuccess: (_data, variables) => {
+      // Invalidate and refetch the specific list
+      queryClient.invalidateQueries({ queryKey: ['shopping-lists', variables.listId] });
+      // Invalidate lists overview
+      queryClient.invalidateQueries({ queryKey: ['shopping-lists'] });
+      // Invalidate logs to show the add action
+      queryClient.invalidateQueries({ queryKey: ['shopping-lists', variables.listId, 'logs'] });
+    },
+  });
+}
+
+// Remove item from shopping list
+export function useRemoveItemFromShoppingList() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ listId, itemId }: { listId: number; itemId: number }) =>
+      shoppingListsAPI.removeItem(listId, itemId),
+    onSuccess: (_data, variables) => {
+      // Invalidate and refetch the specific list
+      queryClient.invalidateQueries({ queryKey: ['shopping-lists', variables.listId] });
+      // Invalidate lists overview
+      queryClient.invalidateQueries({ queryKey: ['shopping-lists'] });
+      // Invalidate logs to show the remove action
+      queryClient.invalidateQueries({ queryKey: ['shopping-lists', variables.listId, 'logs'] });
+    },
+  });
+}
+

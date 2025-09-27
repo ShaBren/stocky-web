@@ -1,9 +1,12 @@
+import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { authAPI } from '../services/api';
-import { useShoppingList, useShoppingListLogs } from '../hooks/useShoppingLists';
+import { useShoppingList, useShoppingListLogs, useUpdateShoppingListItem, useRemoveItemFromShoppingList } from '../hooks/useShoppingLists';
 import { usePageTitle } from '../utils/usePageTitle';
 import { hasPermission } from '../utils/permissions';
+import { AddItemModal } from '../components/AddItemModal';
 
 export function ShoppingListDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -41,6 +44,38 @@ export function ShoppingListDetailPage() {
     shoppingList.creator.id === currentUser.id || // Own list
     hasPermission(currentUser.role, 'canDeleteAnyShoppingList') // Admin
   );
+
+  // Modal states and mutations
+  const [showAddItemModal, setShowAddItemModal] = useState(false);
+  const updateItemMutation = useUpdateShoppingListItem();
+  const removeItemMutation = useRemoveItemFromShoppingList();
+
+  const handleQuantityChange = async (itemId: number, newQuantity: number) => {
+    if (newQuantity < 1) return;
+    try {
+      await updateItemMutation.mutateAsync({
+        listId,
+        itemId,
+        data: { quantity: newQuantity }
+      });
+    } catch (error) {
+      console.error('Failed to update item quantity:', error);
+    }
+  };
+
+  const handleRemoveItem = async (itemId: number) => {
+    try {
+      await removeItemMutation.mutateAsync({ listId, itemId });
+    } catch (error) {
+      console.error('Failed to remove item:', error);
+    }
+  };
+
+  const handleCompleteItem = async (item: any, completed: boolean) => {
+    // TODO: Implement completion logic when the API supports it
+    // For now, just log the action
+    console.log(`${completed ? 'Completed' : 'Uncompleted'} item:`, item.item.name);
+  };
 
   if (error) {
     return (
@@ -152,9 +187,11 @@ export function ShoppingListDetailPage() {
             {canEdit && (
               <button
                 type="button"
+                onClick={() => setShowAddItemModal(true)}
                 className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
-                + Add Item
+                <PlusIcon className="h-4 w-4 mr-1" />
+                Add Item
               </button>
             )}
           </div>
@@ -174,71 +211,93 @@ export function ShoppingListDetailPage() {
                 <div className="mt-6">
                   <button
                     type="button"
+                    onClick={() => setShowAddItemModal(true)}
                     className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   >
-                    + Add your first item
+                    <PlusIcon className="h-4 w-4 mr-2" />
+                    Add your first item
                   </button>
                 </div>
               )}
             </div>
           ) : (
             activeItems.map((listItem) => (
-              <div key={listItem.id} className="px-6 py-4">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
+              <div key={listItem.id} className="px-4 sm:px-6 py-4 sm:py-4">
+                <div className="flex items-start sm:items-center space-x-3">
+                  {/* Checkbox */}
+                  <div className="flex-shrink-0 pt-1 sm:pt-0">
                     <input
                       id={`item-${listItem.id}`}
                       name={`item-${listItem.id}`}
                       type="checkbox"
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      checked={false} // TODO: Implement completion status when API supports it
+                      onChange={(e) => handleCompleteItem(listItem, e.target.checked)}
+                      className="h-5 w-5 sm:h-4 sm:w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded touch-manipulation"
+                      disabled={!canEdit}
                     />
                   </div>
-                  <div className="ml-3 flex-1">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">{listItem.item.name}</p>
-                        {listItem.item.upc && (
-                          <p className="text-sm text-gray-500">UPC: {listItem.item.upc}</p>
-                        )}
-                        {listItem.item.description && (
-                          <p className="text-sm text-gray-500">{listItem.item.description}</p>
-                        )}
+                  
+                  {/* Item Info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-base sm:text-sm font-medium text-gray-900 truncate">
+                          {listItem.item.name}
+                        </p>
+                        <div className="mt-1 space-y-1">
+                          {listItem.item.upc && (
+                            <p className="text-sm text-gray-500">UPC: {listItem.item.upc}</p>
+                          )}
+                          {listItem.item.description && (
+                            <p className="text-sm text-gray-500 line-clamp-2">{listItem.item.description}</p>
+                          )}
+                        </div>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        {canEdit && (
-                          <>
-                            <div className="flex items-center space-x-1">
-                              <button
-                                type="button"
-                                className="inline-flex items-center p-1 border border-transparent rounded-md text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                              >
-                                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
-                                </svg>
-                              </button>
-                              <span className="px-2 py-1 text-sm text-gray-900 bg-gray-50 rounded border min-w-[2rem] text-center">
-                                {listItem.quantity}
-                              </span>
-                              <button
-                                type="button"
-                                className="inline-flex items-center p-1 border border-transparent rounded-md text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                              >
-                                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                                </svg>
-                              </button>
-                            </div>
+                      
+                      {/* Controls - Stack on mobile */}
+                      {canEdit && (
+                        <div className="flex items-center justify-between sm:justify-end space-x-2 sm:space-x-2 sm:ml-4">
+                          {/* Quantity Controls */}
+                          <div className="flex items-center space-x-2 bg-gray-50 rounded-lg p-1">
                             <button
                               type="button"
-                              className="inline-flex items-center p-1 border border-transparent rounded-md text-red-400 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                              onClick={() => handleQuantityChange(listItem.id, listItem.quantity - 1)}
+                              disabled={listItem.quantity <= 1 || updateItemMutation.isPending}
+                              className="inline-flex items-center justify-center w-8 h-8 sm:w-6 sm:h-6 border border-transparent rounded-md text-gray-400 hover:text-gray-600 active:text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
+                              title="Decrease quantity"
                             >
                               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
                               </svg>
                             </button>
-                          </>
-                        )}
-                      </div>
+                            <span className="px-3 py-1 text-sm font-medium text-gray-900 bg-white rounded border min-w-[2.5rem] text-center">
+                              {listItem.quantity}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleQuantityChange(listItem.id, listItem.quantity + 1)}
+                              disabled={updateItemMutation.isPending}
+                              className="inline-flex items-center justify-center w-8 h-8 sm:w-6 sm:h-6 border border-transparent rounded-md text-gray-400 hover:text-gray-600 active:text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
+                              title="Increase quantity"
+                            >
+                              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                              </svg>
+                            </button>
+                          </div>
+                          
+                          {/* Delete Button */}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveItem(listItem.id)}
+                            disabled={removeItemMutation.isPending}
+                            className="inline-flex items-center justify-center w-10 h-10 sm:w-8 sm:h-8 border border-transparent rounded-lg sm:rounded-md text-red-400 hover:text-red-600 active:text-red-700 hover:bg-red-50 active:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
+                            title="Remove item"
+                          >
+                            <TrashIcon className="h-5 w-5 sm:h-4 sm:w-4" />
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -268,10 +327,45 @@ export function ShoppingListDetailPage() {
                       ) : null}
                       <div className="relative flex space-x-3">
                         <div>
-                          <span className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center ring-8 ring-white">
-                            <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                            </svg>
+                          <span className={`h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white ${
+                            log.action_type === 'created' ? 'bg-green-500' :
+                            log.action_type === 'updated' ? 'bg-blue-500' :
+                            log.action_type === 'item_added' ? 'bg-emerald-500' :
+                            log.action_type === 'item_updated' ? 'bg-yellow-500' :
+                            log.action_type === 'item_removed' ? 'bg-red-500' :
+                            log.action_type === 'duplicated' ? 'bg-purple-500' :
+                            'bg-gray-500'
+                          }`}>
+                            {log.action_type === 'created' && (
+                              <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                              </svg>
+                            )}
+                            {log.action_type === 'updated' && (
+                              <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                              </svg>
+                            )}
+                            {log.action_type === 'item_added' && (
+                              <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                              </svg>
+                            )}
+                            {log.action_type === 'item_updated' && (
+                              <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4V2a1 1 0 011-1h4a1 1 0 011 1v2h4a1 1 0 010 2h-1v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6H3a1 1 0 010-2h4z" />
+                              </svg>
+                            )}
+                            {log.action_type === 'item_removed' && (
+                              <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                              </svg>
+                            )}
+                            {log.action_type === 'duplicated' && (
+                              <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                              </svg>
+                            )}
                           </span>
                         </div>
                         <div className="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
@@ -308,6 +402,13 @@ export function ShoppingListDetailPage() {
           </div>
         </div>
       )}
+
+      {/* Add Item Modal */}
+      <AddItemModal
+        isOpen={showAddItemModal}
+        onClose={() => setShowAddItemModal(false)}
+        listId={id || '0'}
+      />
     </div>
   );
 }
