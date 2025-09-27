@@ -13,6 +13,8 @@ import AlertsPage from './pages/AlertsPage';
 import UsersPage from './pages/UsersPage';
 import BulkMovePage from './pages/BulkMovePage';
 import AdminPage from './pages/AdminPage';
+import { ShoppingListsPage } from './pages/ShoppingListsPage';
+import { ShoppingListDetailPage } from './pages/ShoppingListDetailPage';
 import { setAuthToken, initializeApi } from './lib/api';
 import { loadRuntimeConfig } from './lib/runtime-config';
 import { authAPI } from './services/api';
@@ -148,6 +150,8 @@ function App() {
                 <Route path="/alerts" element={<AlertsPage />} />
                 <Route path="/users" element={<UsersPage />} />
                 <Route path="/bulk-move" element={<BulkMovePage />} />
+                <Route path="/shopping-lists" element={<ShoppingListsPage />} />
+                <Route path="/shopping-lists/:id" element={<ShoppingListDetailPage />} />
                 <Route path="/admin" element={<AdminPage />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Route>

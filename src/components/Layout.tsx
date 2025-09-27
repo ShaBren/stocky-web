@@ -16,7 +16,8 @@ import {
   ArchiveBoxIcon,
   CogIcon,
   TagIcon,
-  ArrowsRightLeftIcon
+  ArrowsRightLeftIcon,
+  ListBulletIcon
 } from '@heroicons/react/24/outline';
 
 interface LayoutProps {
@@ -35,6 +36,7 @@ const iconMap = {
   CogIcon,
   TagIcon,
   ArrowsRightLeftIcon,
+  ListBulletIcon,
 };
 
 export function Layout({ onLogout }: LayoutProps) {

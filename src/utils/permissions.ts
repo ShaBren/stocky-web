@@ -15,6 +15,10 @@ export const ROLE_PERMISSIONS = {
     canAccessDashboard: true,
     canAccessAdmin: true,
     canAccessBulkMove: true,
+    canAccessShoppingLists: true,
+    canCreateShoppingLists: true,
+    canEditAnyShoppingList: true,
+    canDeleteAnyShoppingList: true,
     canCreate: true,
     canEdit: true,
     canDelete: true,
@@ -34,6 +38,10 @@ export const ROLE_PERMISSIONS = {
     canAccessDashboard: true,
     canAccessAdmin: false,
     canAccessBulkMove: false,
+    canAccessShoppingLists: true,
+    canCreateShoppingLists: true,
+    canEditAnyShoppingList: false, // Only public lists and own private
+    canDeleteAnyShoppingList: false, // Only own lists
     canCreate: true,
     canEdit: true,
     canDelete: true,
@@ -89,6 +97,10 @@ export function getNavigationItems(userRole: UserRole | string | undefined) {
 
   if (hasPermission(userRole, 'canAccessBulkMove')) {
     items.push({ name: 'Bulk Move', href: '/bulk-move', icon: 'ArrowsRightLeftIcon' });
+  }
+
+  if (hasPermission(userRole, 'canAccessShoppingLists')) {
+    items.push({ name: 'Shopping Lists', href: '/shopping-lists', icon: 'ListBulletIcon' });
   }
 
   if (hasPermission(userRole, 'canAccessScanner')) {
