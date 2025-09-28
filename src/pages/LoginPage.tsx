@@ -13,6 +13,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
   
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
 
@@ -22,7 +23,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
     setErrors([]);
 
     try {
-      const response = await authAPI.login({ username, password });
+      const response = await authAPI.login({ username, password, remember_me: rememberMe });
       onLogin(response.access_token);
     } catch (err: any) {
       const validationErrors = parseValidationErrors(err);
@@ -81,6 +82,21 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
+          </div>
+
+          <div className="flex items-center">
+            <input
+              id="remember-me"
+              name="remember-me"
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+            />
+            <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
+              <span>Remember me</span>
+              <span className="text-xs text-gray-500 block">Stay logged in for 30 days</span>
+            </label>
           </div>
 
           <div>

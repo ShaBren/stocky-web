@@ -21,7 +21,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 interface LayoutProps {
-  onLogout: () => void;
+  onLogout: () => Promise<void>;
 }
 
 // Icon mapping for navigation items
@@ -52,9 +52,13 @@ export function Layout({ onLogout }: LayoutProps) {
   // Get navigation items based on user role
   const navigation = getNavigationItems(currentUser?.role);
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    onLogout();
+  const handleLogout = async () => {
+    try {
+      await onLogout();
+    } catch (error) {
+      console.warn('Logout failed:', error);
+      // Continue anyway - user clicked logout, so respect their intent
+    }
   };
 
   return (

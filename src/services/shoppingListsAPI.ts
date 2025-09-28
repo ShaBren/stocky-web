@@ -20,7 +20,7 @@ export const shoppingListsAPI = {
     limit?: number; 
     include_deleted?: boolean; 
   }): Promise<ShoppingListsPaginatedResponse<ShoppingListSummary>> => {
-    const response = await api.get('/shopping-lists', { params });
+    const response = await api.get('/shopping-lists/', { params });
     return response.data;
   },
 
@@ -30,7 +30,7 @@ export const shoppingListsAPI = {
   },
 
   createList: async (data: ShoppingListCreate): Promise<ShoppingListResponse> => {
-    const response = await api.post('/shopping-lists', data);
+    const response = await api.post('/shopping-lists/', data);
     return response.data;
   },
 

@@ -80,9 +80,12 @@ function App() {
   // Set up automatic token refresh
   const setupTokenRefresh = (expiration: number) => {
     const currentTime = Date.now() / 1000;
-    const timeUntilRefresh = (expiration - currentTime - 300) * 1000; // Refresh 5 minutes before expiry
+    const timeUntilRefresh = (expiration - currentTime - 600) * 1000; // Refresh 10 minutes before expiry (optimized for 30-minute tokens)
     
     if (timeUntilRefresh > 0) {
+      const refreshTime = new Date(Date.now() + timeUntilRefresh);
+      console.log(`🔄 Token refresh scheduled for: ${refreshTime.toLocaleTimeString()} (in ${Math.round(timeUntilRefresh / 1000 / 60)} minutes)`);
+    
       setTimeout(async () => {
         try {
           const response = await authAPI.refresh();
@@ -117,7 +120,16 @@ function App() {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      // Call backend logout to clear HTTP-only cookies
+      await authAPI.logout();
+    } catch (error) {
+      console.warn('Backend logout failed:', error);
+      // Continue with client-side logout even if backend call fails
+    }
+    
+    // Clear client-side tokens and state
     setAuthToken(null);
     setIsAuthenticated(false);
   };

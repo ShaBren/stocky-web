@@ -94,6 +94,7 @@ export type AlertType = typeof AlertType[keyof typeof AlertType];
 export interface LoginRequest {
   username: string;
   password: string;
+  remember_me?: boolean;
 }
 
 export interface LoginResponse {

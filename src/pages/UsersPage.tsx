@@ -110,9 +110,7 @@ export default function UsersPage() {
   });
 
   // Filter users based on search term
-  const allUsers: User[] = Array.isArray(usersData) 
-    ? usersData 
-    : usersData?.items || [];
+  const allUsers: User[] = usersData || [];
   
   const filteredUsers = allUsers.filter((user: User) => 
     user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||

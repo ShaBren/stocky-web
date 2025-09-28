@@ -37,6 +37,15 @@ Authorization: Bearer <jwt_token>
 X-API-Key: <api_key>
 ```
 
+### Persistent Sessions
+For improved user experience, the API supports persistent login sessions:
+
+- **Regular sessions**: 7-day refresh token expiration
+- **Persistent sessions**: 30-day expiration with HTTP-only cookies
+- **"Remember me"**: Enable by setting `remember_me: true` in login requests
+- **Automatic refresh**: Cookie-based sessions automatically refresh without user intervention
+- **Security**: HTTP-only cookies prevent XSS attacks, SameSite protection against CSRF
+
 ### User Roles
 - **ADMIN**: Full access to all endpoints including user management
 - **MEMBER**: Access to inventory operations, limited administrative functions
@@ -45,7 +54,7 @@ X-API-Key: <api_key>
 
 ## Authentication Endpoints
 
-All authentication endpoints are under `/auth/`
+All authentication endpoints are under `/auth`
 
 ### POST /auth/login
 **Description:** Login with username/password (form data)  
@@ -54,8 +63,13 @@ All authentication endpoints are under `/auth/`
 
 **Request Body:**
 ```
-username=your_username&password=your_password
+username=your_username&password=your_password&remember_me=true
 ```
+
+**Form Fields:**
+- `username` (required): User's username
+- `password` (required): User's password
+- `remember_me` (optional): Boolean for persistent session. When `true`, sets HTTP-only cookie for 30-day session
 
 **Response:** `200 OK`
 ```json
@@ -83,7 +97,8 @@ username=your_username&password=your_password
 ```json
 {
   "username": "your_username",
-  "password": "your_password"
+  "password": "your_password",
+  "remember_me": true
 }
 ```
 
@@ -92,12 +107,18 @@ username=your_username&password=your_password
 **Validation:**
 - `username`: 3-50 characters
 - `password`: minimum 8 characters
+- `remember_me`: boolean, default false. When `true`, sets HTTP-only cookie for 30-day persistent session
 
 ---
 
 ### POST /auth/refresh
-**Description:** Refresh access token using valid JWT  
-**Authentication:** Bearer Token required
+**Description:** Refresh access token using valid JWT or HTTP-only cookie  
+**Authentication:** Bearer Token required (or persistent session cookie)
+
+**Notes:**
+- For regular sessions: Uses refresh token from Authorization header
+- For persistent sessions: Automatically uses refresh token from HTTP-only cookie
+- Cookie-based refresh tokens are automatically rotated for security
 
 **Response:** `200 OK`
 ```json
@@ -114,8 +135,12 @@ username=your_username&password=your_password
 ---
 
 ### POST /auth/logout
-**Description:** Logout current user (client should discard tokens)  
+**Description:** Logout current user (clears cookies and client should discard tokens)  
 **Authentication:** Bearer Token required
+
+**Notes:**
+- Automatically clears persistent session cookies if present
+- Client should discard stored access and refresh tokens
 
 **Response:** `200 OK`
 ```json
@@ -175,7 +200,7 @@ username=your_username&password=your_password
 
 ## User Management
 
-All user management endpoints are under `/users/` and require **ADMIN** role.
+All user management endpoints are under `/users` and require **ADMIN** role.
 
 ### GET /users/
 **Description:** List all users  
@@ -312,7 +337,7 @@ All user management endpoints are under `/users/` and require **ADMIN** role.
 
 ## Item Management
 
-All item endpoints are under `/items/`
+All item endpoints are under `/items`
 
 ### GET /items/
 **Description:** List all items  
@@ -453,7 +478,7 @@ All item endpoints are under `/items/`
 
 ## Location Management
 
-All location endpoints are under `/locations/`
+All location endpoints are under `/locations`
 
 ### GET /locations/
 **Description:** List all locations  
@@ -541,7 +566,7 @@ All location endpoints are under `/locations/`
 
 ## SKU/Inventory Management
 
-All SKU endpoints are under `/skus/`
+All SKU endpoints are under `/skus`
 
 ### GET /skus/
 **Description:** List all SKUs (inventory items)  
@@ -675,7 +700,7 @@ All SKU endpoints are under `/skus/`
 
 ## Scanner Operations
 
-All scanner endpoints are under `/scanner/`
+All scanner endpoints are under `/scanner`
 
 ### POST /scanner/scan
 **Description:** Process barcode scan  
@@ -857,7 +882,7 @@ All scanner endpoints are under `/scanner/`
 
 ## Shopping Lists
 
-All shopping list endpoints are under `/shopping-lists/`
+All shopping list endpoints are under `/shopping-lists`
 
 ### GET /shopping-lists/
 **Description:** List shopping lists accessible to current user (public + own private)  
@@ -1237,7 +1262,7 @@ All shopping list endpoints are under `/shopping-lists/`
 
 ## Backup & Restore
 
-All backup endpoints are under `/backup/` and require **ADMIN** role.
+All backup endpoints are under `/backup` and require **ADMIN** role.
 
 ### POST /backup/create/full
 **Description:** Create full database backup  

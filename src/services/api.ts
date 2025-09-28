@@ -19,12 +19,10 @@ import type {
 // Authentication API
 export const authAPI = {
   login: async (credentials: LoginRequest): Promise<LoginResponse> => {
-    const formData = new URLSearchParams();
-    formData.append('username', credentials.username);
-    formData.append('password', credentials.password);
-    
-    const response = await api.post('/auth/login', formData, {
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+    const response = await api.post('/auth/login-json', {
+      username: credentials.username,
+      password: credentials.password,
+      remember_me: credentials.remember_me || false
     });
     return response.data;
   },
@@ -51,14 +49,14 @@ export const authAPI = {
 
 // Users API
 export const usersAPI = {
-  getUsers: async (page = 1, size = 20): Promise<PaginatedResponse<User>> => {
+  getUsers: async (page: number = 1, size: number = 50): Promise<User[]> => {
     const skip = (page - 1) * size;
     const response = await api.get('/users/', { params: { skip, limit: size } });
     return response.data;
   },
 
   getUser: async (id: number): Promise<User> => {
-    const response = await api.get(`/users/${id}/`);
+    const response = await api.get(`/users/${id}`);
     return response.data;
   },
 
@@ -68,12 +66,12 @@ export const usersAPI = {
   },
 
   updateUser: async (id: number, userData: Partial<User>): Promise<User> => {
-    const response = await api.put(`/users/${id}/`, userData);
+    const response = await api.put(`/users/${id}`, userData);
     return response.data;
   },
 
   deleteUser: async (id: number): Promise<void> => {
-    await api.delete(`/users/${id}/`);
+    await api.delete(`/users/${id}`);
   }
 };
 
@@ -85,7 +83,7 @@ export const itemsAPI = {
   },
 
   getItem: async (id: number): Promise<Item> => {
-    const response = await api.get(`/items/${id}/`);
+    const response = await api.get(`/items/${id}`);
     return response.data;
   },
 
@@ -95,17 +93,17 @@ export const itemsAPI = {
   },
 
   updateItem: async (id: number, itemData: Partial<Item>): Promise<Item> => {
-    const response = await api.put(`/items/${id}/`, itemData);
+    const response = await api.put(`/items/${id}`, itemData);
     return response.data;
   },
 
   deleteItem: async (id: number): Promise<void> => {
-    await api.delete(`/items/${id}/`);
+    await api.delete(`/items/${id}`);
   },
 
   searchByUPC: async (upc: string): Promise<Item | null> => {
     try {
-      const response = await api.get(`/items/upc/${upc}/`);
+      const response = await api.get(`/items/upc/${upc}`);
       return response.data;
     } catch (error: any) {
       if (error.response?.status === 404) {
@@ -124,7 +122,7 @@ export const locationsAPI = {
   },
 
   getLocation: async (id: number): Promise<Location> => {
-    const response = await api.get(`/locations/${id}/`);
+    const response = await api.get(`/locations/${id}`);
     return response.data;
   },
 
@@ -134,12 +132,12 @@ export const locationsAPI = {
   },
 
   updateLocation: async (id: number, locationData: Partial<Location>): Promise<Location> => {
-    const response = await api.put(`/locations/${id}/`, locationData);
+    const response = await api.put(`/locations/${id}`, locationData);
     return response.data;
   },
 
   deleteLocation: async (id: number): Promise<void> => {
-    await api.delete(`/locations/${id}/`);
+    await api.delete(`/locations/${id}`);
   }
 };
 
@@ -151,7 +149,7 @@ export const skusAPI = {
   },
 
   getSKU: async (id: number): Promise<SKU> => {
-    const response = await api.get(`/skus/${id}/`);
+    const response = await api.get(`/skus/${id}`);
     return response.data;
   },
 
@@ -161,16 +159,16 @@ export const skusAPI = {
   },
 
   updateSKU: async (id: number, skuData: Partial<SKU>): Promise<SKU> => {
-    const response = await api.put(`/skus/${id}/`, skuData);
+    const response = await api.put(`/skus/${id}`, skuData);
     return response.data;
   },
 
   deleteSKU: async (id: number): Promise<void> => {
-    await api.delete(`/skus/${id}/`);
+    await api.delete(`/skus/${id}`);
   },
 
   updateQuantity: async (id: number, quantity: number): Promise<SKU> => {
-    const response = await api.put(`/skus/${id}/quantity/`, { quantity });
+    const response = await api.put(`/skus/${id}/quantity`, { quantity });
     return response.data;
   }
 };
@@ -190,12 +188,12 @@ export const alertsAPI = {
   },
 
   markAsRead: async (id: number): Promise<Alert> => {
-    const response = await api.patch(`/alerts/${id}/acknowledge/`);
+    const response = await api.patch(`/alerts/${id}/acknowledge`);
     return response.data;
   },
 
   markAsResolved: async (id: number): Promise<Alert> => {
-    const response = await api.patch(`/alerts/${id}/resolve/`);
+    const response = await api.patch(`/alerts/${id}/resolve`);
     return response.data;
   }
 };

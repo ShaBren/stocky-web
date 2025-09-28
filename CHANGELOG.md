@@ -5,6 +5,33 @@ All notable changes to StockyWeb will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.2] - Persistent Sessions & Login UX Improvements - 2025-09-27
+
+### 🎉 **NEW FEATURES**
+- **Persistent Sessions**: Added "Remember Me" functionality for 30-day login sessions
+  - HTTP-only cookie support for enhanced security (XSS protection)
+  - Automatic token refresh with cookie-based authentication
+  - Clear UI messaging: "Stay logged in for 30 days"
+- **Enhanced Login Form**: Added remember me checkbox with intuitive design
+
+### 🔧 **FIXED**
+- **Login Error Handling**: Fixed page refresh on invalid credentials - errors now display properly without redirect
+- **Token Refresh Endpoint**: Corrected `/auth/refresh` URL (removed incorrect trailing slash)
+- **Authentication Flow**: Login failures no longer trigger automatic page redirects
+
+### 🛡️ **IMPROVED**
+- **Session Security**: HTTP-only cookies prevent XSS attacks on refresh tokens
+- **Token Management**: Optimized refresh timing for 30-minute tokens (10-minute buffer)
+- **API Integration**: Switched to `/auth/login-json` endpoint with JSON payload
+- **Cookie Support**: Enabled `withCredentials: true` for automatic cookie handling
+- **Logout Process**: Backend logout call now properly clears HTTP-only cookies
+- **Error Resilience**: Improved handling of network errors during token refresh
+
+### 🎯 **TECHNICAL IMPROVEMENTS**
+- **Backwards Compatibility**: Regular 7-day sessions still work without "Remember Me"
+- **Graceful Degradation**: Network failures don't immediately log users out
+- **Seamless UX**: Persistent sessions work transparently with existing UI
+
 ## [0.2.1] - API Endpoint and Redirect Fixes - 2025-09-27
 
 ### 🔧 **Fixed**
