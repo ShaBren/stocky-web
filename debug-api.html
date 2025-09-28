@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Debug Test</title>
+</head>
+<body>
+    <h1>API Debug Test</h1>
+    <div id="results"></div>
+    
+    <script>
+        // Test what runtime config is loaded
+        function checkRuntimeConfig() {
+            const results = document.getElementById('results');
+            
+            // Check if config.js was loaded
+            if (window.APP_CONFIG) {
+                results.innerHTML += `<p><strong>✅ Runtime Config Loaded:</strong><br>API Base URL: ${window.APP_CONFIG.apiBaseUrl}</p>`;
+            } else {
+                results.innerHTML += `<p><strong>❌ Runtime Config NOT loaded</strong></p>`;
+            }
+            
+            // Check environment variables
+            results.innerHTML += `<p><strong>Build-time VITE_API_BASE_URL:</strong> ${import.meta?.env?.VITE_API_BASE_URL || 'undefined'}</p>`;
+            
+            // Test API call
+            if (window.APP_CONFIG) {
+                testShoppingListsEndpoint(window.APP_CONFIG.apiBaseUrl);
+            }
+        }
+        
+        function testShoppingListsEndpoint(baseUrl) {
+            const results = document.getElementById('results');
+            const fullUrl = `${baseUrl}/shopping-lists/`;
+            
+            results.innerHTML += `<p><strong>Testing Shopping Lists endpoint:</strong><br>${fullUrl}</p>`;
+            
+            fetch(fullUrl, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                results.innerHTML += `<p><strong>Response Status:</strong> ${response.status} ${response.statusText}</p>`;
+                return response.text();
+            })
+            .then(data => {
+                results.innerHTML += `<p><strong>Response:</strong> ${data.substring(0, 200)}...</p>`;
+            })
+            .catch(error => {
+                results.innerHTML += `<p><strong>❌ Error:</strong> ${error.message}</p>`;
+            });
+        }
+        
+        // Try to load config.js first
+        const script = document.createElement('script');
+        script.src = '/config.js?t=' + Date.now();
+        script.onload = () => {
+            setTimeout(checkRuntimeConfig, 100);
+        };
+        script.onerror = () => {
+            document.getElementById('results').innerHTML += '<p><strong>❌ Failed to load /config.js</strong></p>';
+            checkRuntimeConfig();
+        };
+        document.head.appendChild(script);
+    </script>
+</body>
+</html>

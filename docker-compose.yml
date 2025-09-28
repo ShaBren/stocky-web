@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
       # Keep build args as fallbacks for non-runtime scenarios
       args:
-        - VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:8000/api/v1}
+        - VITE_API_BASE_URL=${VITE_API_BASE_URL:-https://localhost:8000/api/v1}
         - VITE_APP_NAME=${VITE_APP_NAME:-StockyWeb}
         - VITE_APP_VERSION=${VITE_APP_VERSION:-0.0.1}
         - VITE_ENABLE_ANALYTICS=${VITE_ENABLE_ANALYTICS:-false}
@@ -18,7 +18,7 @@ services:
       - "${WEB_PORT:-3000}:80"
     environment:
       # Runtime configuration (takes precedence over build-time config)
-      - RUNTIME_API_BASE_URL=${RUNTIME_API_BASE_URL:-${VITE_API_BASE_URL:-http://localhost:8000/api/v1}}
+      - RUNTIME_API_BASE_URL=${RUNTIME_API_BASE_URL:-${VITE_API_BASE_URL:-https://localhost:8000/api/v1}}
       - RUNTIME_APP_NAME=${RUNTIME_APP_NAME:-${VITE_APP_NAME:-StockyWeb}}
       - RUNTIME_APP_VERSION=${RUNTIME_APP_VERSION:-${VITE_APP_VERSION:-0.0.1}}
       - RUNTIME_ENABLE_ANALYTICS=${RUNTIME_ENABLE_ANALYTICS:-${VITE_ENABLE_ANALYTICS:-false}}

@@ -5,6 +5,18 @@ All notable changes to StockyWeb will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] - API Endpoint and Redirect Fixes - 2025-09-27
+
+### 🔧 **Fixed**
+- **Shopping Lists API**: Removed trailing slashes from all shopping list endpoints to match working auth endpoints pattern
+- **HTTP/HTTPS Redirect Protection**: Added comprehensive axios interceptors to handle redirects and prevent mixed content errors
+- **Base URL Consistency**: Enhanced request interceptor to ensure all requests use the correct HTTPS base URL from runtime configuration
+- **Redirect Detection**: Added response interceptor that automatically converts HTTP redirects to HTTPS when base URL is HTTPS
+
+### 🛡️ **Improved**
+- **Debug Logging**: Enhanced API request/response logging to track redirects and protocol changes
+- **Error Prevention**: Added safeguards against HTTPS→HTTP downgrades during redirects
+
 ## [0.2.0] - The Shopping List Update - 2025-09-27
 
 ### 🎉 **MAJOR FEATURE: Complete Shopping Lists Implementation**

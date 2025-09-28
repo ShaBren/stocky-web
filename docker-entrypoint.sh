@@ -6,7 +6,7 @@
 set -e
 
 # Default values (matching build-time defaults)
-API_BASE_URL=${RUNTIME_API_BASE_URL:-${VITE_API_BASE_URL:-"http://localhost:8000/api/v1"}}
+API_BASE_URL=${RUNTIME_API_BASE_URL:-${VITE_API_BASE_URL:-"https://localhost:8000/api/v1"}}
 APP_NAME=${RUNTIME_APP_NAME:-${VITE_APP_NAME:-"StockyWeb"}}
 APP_VERSION=${RUNTIME_APP_VERSION:-${VITE_APP_VERSION:-"0.0.1"}}
 ENABLE_ANALYTICS=${RUNTIME_ENABLE_ANALYTICS:-${VITE_ENABLE_ANALYTICS:-"false"}}
@@ -38,6 +38,10 @@ console.log("🚀 Runtime configuration loaded:", window.APP_CONFIG);
 EOF
 
 echo "✅ Runtime configuration generated successfully"
+
+# Debug: Show the generated config.js content
+echo "🔍 DEBUG - Generated config.js content:"
+cat /usr/share/nginx/html/config.js
 
 # Start nginx
 echo "🌐 Starting nginx..."

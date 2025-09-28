@@ -44,6 +44,8 @@ export async function loadRuntimeConfig(): Promise<RuntimeConfig> {
     if (window.APP_CONFIG) {
       runtimeConfig = window.APP_CONFIG;
       console.log('✅ Loaded runtime configuration:', runtimeConfig);
+      console.log('🔍 DEBUG - Runtime config apiBaseUrl:', runtimeConfig.apiBaseUrl);
+      console.log('🔍 DEBUG - Protocol check:', runtimeConfig.apiBaseUrl.startsWith('https://') ? 'HTTPS ✅' : 'HTTP ❌');
       return runtimeConfig;
     }
   } catch (error) {
@@ -52,7 +54,7 @@ export async function loadRuntimeConfig(): Promise<RuntimeConfig> {
 
   // Fallback to build-time environment variables
   runtimeConfig = {
-    apiBaseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1',
+    apiBaseUrl: import.meta.env.VITE_API_BASE_URL || 'https://localhost:8000/api/v1',
     appName: import.meta.env.VITE_APP_NAME || 'StockyWeb',
     appVersion: import.meta.env.VITE_APP_VERSION || '0.0.1',
     enableAnalytics: import.meta.env.VITE_ENABLE_ANALYTICS === 'true',

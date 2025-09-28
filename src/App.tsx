@@ -15,6 +15,7 @@ import BulkMovePage from './pages/BulkMovePage';
 import AdminPage from './pages/AdminPage';
 import { ShoppingListsPage } from './pages/ShoppingListsPage';
 import { ShoppingListDetailPage } from './pages/ShoppingListDetailPage';
+import { APIDebugPage } from './pages/APIDebugPage';
 import { setAuthToken, initializeApi } from './lib/api';
 import { loadRuntimeConfig } from './lib/runtime-config';
 import { authAPI } from './services/api';
@@ -153,6 +154,7 @@ function App() {
                 <Route path="/shopping-lists" element={<ShoppingListsPage />} />
                 <Route path="/shopping-lists/:id" element={<ShoppingListDetailPage />} />
                 <Route path="/admin" element={<AdminPage />} />
+                <Route path="/api-debug" element={<APIDebugPage />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Route>
             </Routes>
