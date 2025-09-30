@@ -64,7 +64,7 @@ export interface Alert {
 export interface LogEntry {
   id: number;
   action: string;
-  details: Record<string, any>;
+  details: Record<string, unknown>;
   user_id: number;
   created_at: string;
   user?: User;

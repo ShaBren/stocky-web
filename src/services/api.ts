@@ -105,8 +105,9 @@ export const itemsAPI = {
     try {
       const response = await api.get(`/items/upc/${upc}`);
       return response.data;
-    } catch (error: any) {
-      if (error.response?.status === 404) {
+    } catch (error: unknown) {
+      const axiosError = error as { response?: { status?: number } };
+      if (axiosError.response?.status === 404) {
         return null;
       }
       throw error;
@@ -209,7 +210,7 @@ export const scannerAPI = {
     return response.data;
   },
 
-  logActivity: async (action: string, details: Record<string, any>): Promise<void> => {
+  logActivity: async (action: string, details: Record<string, unknown>): Promise<void> => {
     await api.post('/scanner/activity', { action, details });
   }
 };
@@ -218,7 +219,7 @@ export const scannerAPI = {
 export const logsAPI = {
   getLogs: async (page = 1, size = 20, level?: string, module?: string): Promise<PaginatedResponse<LogEntry>> => {
     const skip = (page - 1) * size;
-    const params: any = { skip, limit: size };
+    const params: Record<string, unknown> = { skip, limit: size };
     if (level) params.level = level;
     if (module) params.module = module;
     

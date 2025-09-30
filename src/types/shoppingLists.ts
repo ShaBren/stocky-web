@@ -53,7 +53,7 @@ export interface ShoppingListLogResponse {
   id: number;
   action_type: string;
   user: User;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
   timestamp: string;
 }
 

@@ -4,8 +4,8 @@ export interface ValidationError {
   type: string;
   loc: (string | number)[];
   msg: string;
-  input: any;
-  ctx?: Record<string, any>;
+  input: unknown;
+  ctx?: Record<string, unknown>;
 }
 
 export interface APIErrorResponse {
@@ -15,12 +15,13 @@ export interface APIErrorResponse {
 /**
  * Extract user-friendly error messages from FastAPI validation errors
  */
-export function parseValidationErrors(error: any): string[] {
-  if (!error?.response?.data?.detail) {
+export function parseValidationErrors(error: unknown): string[] {
+  const axiosError = error as { response?: { data?: { detail?: ValidationError[] | string } } };
+  if (!axiosError?.response?.data?.detail) {
     return ['An unexpected error occurred'];
   }
 
-  const detail = error.response.data.detail;
+  const detail = axiosError.response.data.detail;
 
   // If detail is a string, return it as-is
   if (typeof detail === 'string') {
@@ -35,17 +36,19 @@ export function parseValidationErrors(error: any): string[] {
 
       // Customize messages based on error type
       switch (validationError.type) {
-        case 'string_too_short':
+        case 'string_too_short': {
           const minLength = validationError.ctx?.min_length;
           return minLength 
             ? `${formatFieldName(field)} must be at least ${minLength} characters long`
             : `${formatFieldName(field)} is too short`;
+        }
             
-        case 'string_too_long':
+        case 'string_too_long': {
           const maxLength = validationError.ctx?.max_length;
           return maxLength
             ? `${formatFieldName(field)} must be no more than ${maxLength} characters long`
             : `${formatFieldName(field)} is too long`;
+        }
             
         case 'value_error':
           return `${formatFieldName(field)}: ${message}`;
@@ -80,32 +83,34 @@ function formatFieldName(field: string): string {
 /**
  * Get a general error message for non-validation errors
  */
-export function getGeneralErrorMessage(error: any): string {
-  if (error?.response?.status === 401) {
+export function getGeneralErrorMessage(error: unknown): string {
+  const axiosError = error as { response?: { status?: number; data?: { detail?: string } } };
+  if (axiosError?.response?.status === 401) {
     return 'Authentication required. Please log in again.';
   }
   
-  if (error?.response?.status === 403) {
+  if (axiosError?.response?.status === 403) {
     return 'You do not have permission to perform this action.';
   }
   
-  if (error?.response?.status === 404) {
+  if (axiosError?.response?.status === 404) {
     return 'The requested resource was not found.';
   }
   
-  if (error?.response?.status === 409) {
+  if (axiosError?.response?.status === 409) {
     return 'This operation conflicts with existing data.';
   }
   
-  if (error?.response?.status >= 500) {
+  if (axiosError?.response?.status && axiosError.response.status >= 500) {
     return 'Server error. Please try again later.';
   }
   
-  if (error?.response?.data?.detail) {
-    if (typeof error.response.data.detail === 'string') {
-      return error.response.data.detail;
+  if (axiosError?.response?.data?.detail) {
+    if (typeof axiosError.response.data.detail === 'string') {
+      return axiosError.response.data.detail;
     }
   }
   
-  return error?.message || 'An unexpected error occurred';
+  const errorMessage = (error as { message?: string })?.message;
+  return errorMessage || 'An unexpected error occurred';
 }

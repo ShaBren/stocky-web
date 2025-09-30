@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { jwtDecode } from 'jwt-decode';
+import { jwtDecode, type JwtPayload } from 'jwt-decode';
 import { getApiBaseUrl } from './runtime-config';
 
 // API Configuration - will be set after runtime config loads
@@ -38,9 +38,9 @@ let refreshPromise: Promise<string> | null = null;
 // Check if token is expired or about to expire (within buffer time)
 const isTokenExpired = (token: string): boolean => {
   try {
-    const decoded: any = jwtDecode(token);
+    const decoded = jwtDecode<JwtPayload>(token);
     const currentTime = Date.now() / 1000;
-    return decoded.exp < (currentTime + TOKEN_REFRESH_BUFFER);
+    return decoded.exp ? decoded.exp < (currentTime + TOKEN_REFRESH_BUFFER) : true;
   } catch {
     return true;
   }
@@ -61,16 +61,17 @@ const refreshToken = async (): Promise<string> => {
       const newToken = response.data.access_token;
       setAuthToken(newToken);
       return newToken;
-    } catch (error: any) {
-      console.warn('Token refresh failed:', error.response?.status, error.message);
+    } catch (error: unknown) {
+      const axiosError = error as { response?: { status?: number }; message?: string };
+      console.warn('Token refresh failed:', axiosError.response?.status, axiosError.message);
       
       // Only redirect to login for certain error types
-      if (error.response?.status === 401 || error.response?.status === 403) {
+      if (axiosError.response?.status === 401 || axiosError.response?.status === 403) {
         // Unauthorized or Forbidden - token is definitely invalid
         console.info('Token is invalid, redirecting to login');
         setAuthToken(null);
         window.location.href = '/login';
-      } else if (error.response?.status === 404) {
+      } else if (axiosError.response?.status === 404) {
         // Backend doesn't support refresh - keep user logged in but disable auto-refresh
         console.info('Token refresh not supported by backend, disabling auto-refresh');
         // Don't redirect to login, just disable future refresh attempts
@@ -220,9 +221,10 @@ api.interceptors.response.use(
         await refreshToken();
         // Retry the original request with the new token
         return api(originalRequest);
-      } catch (refreshError: any) {
+      } catch (refreshError: unknown) {
+        const axiosRefreshError = refreshError as { response?: { status?: number } };
         // Only redirect if the refresh error was due to authentication issues
-        if (refreshError.response?.status === 401 || refreshError.response?.status === 403) {
+        if (axiosRefreshError.response?.status === 401 || axiosRefreshError.response?.status === 403) {
           setAuthToken(null);
           window.location.href = '/login';
         }

@@ -122,6 +122,7 @@ export default function ScannerPage() {
     };
 
     processNextJob();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scanJobs, isProcessing]);
 
   // Remove old toasts
@@ -204,7 +205,7 @@ export default function ScannerPage() {
               : j
           ));
           addToast('success', itemWithBarcode ? 'Added item to new location (quantity: 1)' : 'Added new item (quantity: 1)');
-        } catch (error) {
+        } catch {
           setScanJobs(prev => prev.map(j => 
             j.id === job.id 
               ? { ...j, status: 'error', message: 'Failed to create item or SKU' }

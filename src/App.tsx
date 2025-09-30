@@ -48,7 +48,7 @@ function App() {
         const token = localStorage.getItem('stocky_auth_token');
         if (token) {
           try {
-            const decoded: any = jwtDecode(token);
+            const decoded = jwtDecode<{ exp: number }>(token);
             const currentTime = Date.now() / 1000;
             
             // Check if token is still valid (not expired)
@@ -62,7 +62,7 @@ function App() {
               // Token is expired, remove it
               localStorage.removeItem('stocky_auth_token');
             }
-          } catch (error) {
+          } catch {
             // Invalid token, remove it
             localStorage.removeItem('stocky_auth_token');
           }
@@ -75,6 +75,7 @@ function App() {
     };
 
     initializeApp();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Set up automatic token refresh
@@ -92,12 +93,13 @@ function App() {
           setAuthToken(response.access_token);
           
           // Set up next refresh
-          const newDecoded: any = jwtDecode(response.access_token);
+          const newDecoded = jwtDecode<{ exp: number }>(response.access_token);
           setupTokenRefresh(newDecoded.exp);
-        } catch (error: any) {
+        } catch (error: unknown) {
           console.warn('Token refresh failed:', error);
           // If it's a 404, the backend doesn't support refresh
-          if (error.response?.status === 404) {
+          const axiosError = error as { response?: { status?: number } };
+          if (axiosError.response?.status === 404) {
             console.info('Token refresh not supported by backend');
             return;
           }
@@ -113,7 +115,7 @@ function App() {
     
     // Set up automatic refresh for the new token
     try {
-      const decoded: any = jwtDecode(token);
+      const decoded = jwtDecode<{ exp: number }>(token);
       setupTokenRefresh(decoded.exp);
     } catch (error) {
       console.warn('Failed to decode token for refresh setup:', error);

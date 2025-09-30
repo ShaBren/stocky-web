@@ -25,7 +25,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
     try {
       const response = await authAPI.login({ username, password, remember_me: rememberMe });
       onLogin(response.access_token);
-    } catch (err: any) {
+    } catch (err: unknown) {
       const validationErrors = parseValidationErrors(err);
       if (validationErrors.length === 0) {
         const generalError = getGeneralErrorMessage(err);

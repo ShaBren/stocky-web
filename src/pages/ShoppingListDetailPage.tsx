@@ -7,6 +7,7 @@ import { useShoppingList, useShoppingListLogs, useUpdateShoppingListItem, useRem
 import { usePageTitle } from '../utils/usePageTitle';
 import { hasPermission } from '../utils/permissions';
 import { AddItemModal } from '../components/AddItemModal';
+import type { ShoppingListItemResponse } from '../types/shoppingLists';
 
 export function ShoppingListDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -71,7 +72,7 @@ export function ShoppingListDetailPage() {
     }
   };
 
-  const handleCompleteItem = async (item: any, completed: boolean) => {
+  const handleCompleteItem = async (item: ShoppingListItemResponse, completed: boolean) => {
     // TODO: Implement completion logic when the API supports it
     // For now, just log the action
     console.log(`${completed ? 'Completed' : 'Uncompleted'} item:`, item.item.name);
@@ -381,11 +382,18 @@ export function ShoppingListDetailPage() {
                             </p>
                             {log.details && (
                               <div className="mt-1 text-xs text-gray-400">
-                                {log.action_type === 'item_added' && `Quantity: ${log.details.quantity}`}
-                                {log.action_type === 'item_updated' && log.details.quantity && 
-                                  `Quantity: ${log.details.quantity.from} → ${log.details.quantity.to}`
+                                {log.action_type === 'item_added' && 
+                                  (log.details as { quantity?: number }).quantity && 
+                                  `Quantity: ${(log.details as { quantity: number }).quantity}`
                                 }
-                                {log.action_type === 'item_removed' && `Quantity was: ${log.details.quantity}`}
+                                {log.action_type === 'item_updated' && 
+                                  (log.details as { quantity?: { from: number; to: number } }).quantity && 
+                                  `Quantity: ${(log.details as { quantity: { from: number; to: number } }).quantity.from} → ${(log.details as { quantity: { from: number; to: number } }).quantity.to}`
+                                }
+                                {log.action_type === 'item_removed' && 
+                                  (log.details as { quantity?: number }).quantity && 
+                                  `Quantity was: ${(log.details as { quantity: number }).quantity}`
+                                }
                               </div>
                             )}
                           </div>

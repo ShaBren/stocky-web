@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest'
 import { hasPermission } from '../../../src/utils/permissions'
-import type { UserRole } from '../../../src/utils/permissions'
 
 describe('Permission Utils', () => {
   describe('hasPermission', () => {

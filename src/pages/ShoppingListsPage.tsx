@@ -41,7 +41,7 @@ export function ShoppingListsPage() {
 
   // Filter and sort lists based on search, visibility, and sort options
   const filteredAndSortedLists = React.useMemo(() => {
-    let filtered = listsResponse?.items?.filter(list => {
+    const filtered = listsResponse?.items?.filter(list => {
       const matchesSearch = searchQuery === '' || 
         list.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         list.creator.username.toLowerCase().includes(searchQuery.toLowerCase());
