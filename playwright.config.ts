@@ -5,6 +5,15 @@ import { defineConfig, devices } from '@playwright/test'
  */
 export default defineConfig({
   testDir: './tests/e2e',
+  /* Start the dev server before running tests */
+  webServer: {
+    command: process.env.CI
+      ? 'npx vite preview --port 5173 --strictPort'
+      : 'npm run dev',
+    url: 'http://localhost:5173',
+    reuseExistingServer: !process.env.CI,
+    timeout: 120000,
+  },
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code */
