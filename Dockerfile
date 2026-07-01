@@ -1,5 +1,5 @@
 # Multi-stage build for optimal production image
-FROM node:20-alpine AS build
+FROM node:22-alpine AS build
 
 # Build arguments for Vite environment variables
 ARG VITE_API_BASE_URL

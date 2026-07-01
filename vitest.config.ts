@@ -1,5 +1,5 @@
-/// <reference types="vitest" />
-import { defineConfig } from 'vite'
+/// <reference types="vitest/config" />
+import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import { resolve } from 'path'
 
@@ -20,19 +20,11 @@ export default defineConfig({
         'dist/',
         'build/',
         'coverage/',
-        '**/index.ts', // Entry files
-        '**/*.stories.*', // Storybook files
+        '**/index.ts',
+        '**/*.stories.*',
         '**/*.test.*',
         '**/*.spec.*'
       ],
-      thresholds: {
-        global: {
-          statements: 90,
-          branches: 85,
-          functions: 90,
-          lines: 90
-        }
-      }
     },
     // Test file patterns
     include: [

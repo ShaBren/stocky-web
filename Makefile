@@ -95,8 +95,7 @@ lint:
 
 format:
 	@echo "Formatting code..."
-	@echo "Note: Add prettier script to package.json if needed"
-	npx prettier --write "src/**/*.{ts,tsx,js,jsx,json,css,md}"
+	npx eslint --fix "src/**/*.{ts,tsx}"
 
 type-check:
 	@echo "Running TypeScript type checking..."
