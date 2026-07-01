@@ -2,8 +2,19 @@
 
 All notable changes to StockyWeb will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [0.2.3] - 2026-07-01 — Tooling Modernization
+
+### Changed
+- **CI**: `checkout@v5→v4`, Node 22 only, `workflow_dispatch`, type-check step
+- **CI**: Collapsed redundant jobs (build-test, test-summary) → simple test + e2e
+- **Docker**: `node:20-alpine` → `node:22-alpine` (active LTS)
+- **Vitest**: Import from `vitest/config`, removed aggressive coverage thresholds
+- **Makefile**: `prettier` → `eslint --fix`, docker-image → GHCR
+
+### Added
+- **GHCR Release Workflow**: Multi-arch Docker images on tagged releases
+- **Dependabot**: Monthly GitHub Actions + npm updates
+- **`workflow_dispatch`**: Manual CI trigger
 
 ## [0.2.2] - Persistent Sessions & Login UX Improvements - 2025-09-27
 

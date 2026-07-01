@@ -22,13 +22,12 @@ help:
 	@echo ""
 	@echo "Code Quality:"
 	@echo "  make lint        - Run ESLint"
-	@echo "  make format      - Format code with Prettier"
+	@echo "  make format      - Format code with ESLint"
 	@echo "  make type-check  - Run TypeScript type checking"
 	@echo ""
 	@echo "Docker:"
 	@echo "  make docker-build  - Build Docker image locally"
-	@echo "  make docker-run    - Run Docker container"
-	@echo "  make docker-image  - Build and push to registry"
+	@echo "  make docker-image  - Build and push multi-arch image to GHCR"
 	@echo ""
 	@echo "Git:"
 	@echo "  make status      - Show git status"
@@ -116,7 +115,7 @@ docker-dev:
 
 # Original registry build command
 docker-image:
-	docker buildx build --platform linux/amd64,linux/arm64 -t docker-registry.eruditio.net/stocky-web:latest --push .
+	docker buildx build --platform linux/amd64,linux/arm64 -t ghcr.io/shabren/stocky-web:latest --push .
 
 # Git commands
 status:
