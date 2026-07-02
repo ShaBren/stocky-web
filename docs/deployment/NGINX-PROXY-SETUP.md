@@ -83,4 +83,4 @@ If you encounter issues:
 
 ## Alternative: Docker Compose Override
 
-If Nginx Proxy Manager doesn't work as expected, you can also add these rules directly to the nginx.conf in your Docker setup or create a custom Nginx container with these rules.
+If Nginx Proxy Manager doesn't work as expected, you can also add these rules directly to the nginx/nginx.conf in your Docker setup or create a custom Nginx container with these rules.

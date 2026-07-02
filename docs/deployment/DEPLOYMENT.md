@@ -116,7 +116,7 @@ docker-compose --env-file .env.production up -d
 #### Option 3: Release Script
 ```bash
 # Complete release build with validation
-./scripts/build-release.sh stocky-web:0.0.1
+/scripts/build-release.sh stocky-web:0.0.1
 ```
 
 ## Configuration
