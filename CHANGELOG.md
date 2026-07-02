@@ -2,6 +2,40 @@
 
 All notable changes to StockyWeb will be documented in this file.
 
+## [0.3.1] - 2026-07-01
+
+### Fixed
+- **TypeScript**: Fix `tsc -b` production build errors (ProfileModal, scannerAPI types) ✨ Fixed by @github-actions
+- **CI**: Disable e2e job (Playwright needs GUI libs unavailable on free-tier runners)
+
+## [0.3.0] - 2026-07-01 — The Architecture Refactor
+
+### Changed
+- **Auth**: JWT-in-localStorage → session-cookie auth (httpOnly, withCredentials)
+  - Removed all `localStorage` token storage, `jwtDecode`, token refresh logic
+  - `App.tsx`: check auth via `GET /auth/me` instead of JWT decode
+  - `LoginPage`: no longer passes access token to parent
+  - `ProfileModal`: uses dedicated `authAPI.changePassword()` endpoint
+  - `LoginResponse`: `{user_id, role, username}` replaces old token fields
+- **Scanner**: Page uses backend scanner API with command support
+  - Replaces manual item/SKU mutations with `scannerAPI.scanBarcode()`
+  - Mode selector (add/remove/lookup) synced with backend scanner state
+  - Last scan result display with item name and inventory counts
+- **Backup**: Admin page uses new JSON export/import endpoints
+  - `backupAPI`: 6 methods → 3 (`downloadBackup`, `restoreBackup`, `getStatus`)
+  - Single-click download, unified restore with merge/replace radio
+  - Confirm checkbox for destructive replace mode
+  - Accept `.json.gz` files (was `.sql.gz`)
+- **Users**: Expanded `UserRole` to all 4 roles (`ADMIN | MEMBER | SCANNER | READ_ONLY`)
+  - Added SCANNER (view+scan only) and READ_ONLY (view only) permission mappings
+  - UsersPage role dropdown shows all 4 roles
+
+### Removed
+- `jwt-decode` dependency (no longer needed)
+- `BackupResponse`, `ImportRequest`, `BackupUploadData` types (old backup system)
+- 200+ lines of token management from `src/lib/api.ts`
+- 200+ lines of manual SKU logic from `ScannerPage`
+
 ## [0.2.3] - 2026-07-01 — Tooling Modernization
 
 ### Changed
