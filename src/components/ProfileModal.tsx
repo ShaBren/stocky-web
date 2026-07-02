@@ -29,6 +29,7 @@ export function ProfileModal({ user, isOpen, onClose }: ProfileModalProps) {
   });
   const [formErrors, setFormErrors] = useState<string[]>([]);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [isPending, setIsPending] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -56,6 +57,7 @@ export function ProfileModal({ user, isOpen, onClose }: ProfileModalProps) {
     }
 
     try {
+      setIsPending(true);
       // Update email if changed
       if (formData.email !== user.email) {
         await authAPI.updateProfile(user.id, { email: formData.email });
@@ -70,6 +72,8 @@ export function ProfileModal({ user, isOpen, onClose }: ProfileModalProps) {
     } catch (error) {
       const validationErrors = parseValidationErrors(error);
       setFormErrors(validationErrors.length > 0 ? validationErrors : ['Failed to update profile']);
+    } finally {
+      setIsPending(false);
     }
   };
 
@@ -222,10 +226,10 @@ export function ProfileModal({ user, isOpen, onClose }: ProfileModalProps) {
               </button>
               <button
                 type="submit"
-                disabled={updateProfileMutation.isPending}
+                disabled={isPending}
                 className="stocky-button-primary"
               >
-                {updateProfileMutation.isPending ? 'Updating...' : 'Update Profile'}
+                {isPending ? 'Updating...' : 'Update Profile'}
               </button>
             </div>
           </form>

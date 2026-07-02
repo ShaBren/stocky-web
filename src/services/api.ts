@@ -202,7 +202,7 @@ export const alertsAPI = {
 
 // Scanner API
 export const scannerAPI = {
-  scanBarcode: async (upc: string, locationHint?: string, scannerId?: string): Promise<{ success: boolean; item?: Item; skus?: SKU[]; message: string; suggested_actions?: string[] }> => {
+  scanBarcode: async (upc: string, locationHint?: string, scannerId?: string): Promise<{ success: boolean; item?: Item; skus?: SKU[]; message: string; suggested_actions?: string[]; mode?: string | null; scanner_state?: Record<string, unknown> | null }> => {
     const response = await api.post('/scanner/scan', { 
       upc, 
       location_hint: locationHint,
