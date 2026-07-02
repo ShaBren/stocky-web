@@ -24,11 +24,18 @@ export function initializeApi(): void {
   api.defaults.baseURL = API_BASE_URL;
 }
 
-// Response interceptor — redirect to login on 401
+let _appInitialized = false;
+
+/** Mark the API client as initialized — 401 redirects are only active after this. */
+export function markApiInitialized(): void {
+  _appInitialized = true;
+}
+
+// Response interceptor — redirect to login on 401 (only after app initialized)
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response?.status === 401) {
+    if (_appInitialized && error.response?.status === 401) {
       const isLoginRequest = error.config?.url?.includes('/auth/login');
       if (!isLoginRequest) {
         window.location.href = '/login';

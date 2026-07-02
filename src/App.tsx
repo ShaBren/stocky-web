@@ -15,7 +15,7 @@ import AdminPage from './pages/AdminPage';
 import { ShoppingListsPage } from './pages/ShoppingListsPage';
 import { ShoppingListDetailPage } from './pages/ShoppingListDetailPage';
 import { APIDebugPage } from './pages/APIDebugPage';
-import { initializeApi } from './lib/api';
+import { initializeApi, markApiInitialized } from './lib/api';
 import { loadRuntimeConfig } from './lib/runtime-config';
 import { authAPI } from './services/api';
 
@@ -43,12 +43,12 @@ function App() {
           await authAPI.getCurrentUser();
           setIsAuthenticated(true);
         } catch {
-          // No valid session — stay on login page
           setIsAuthenticated(false);
         }
       } catch (error) {
         console.error('Failed to initialize app:', error);
       } finally {
+        markApiInitialized();
         setIsLoading(false);
       }
     };
