@@ -33,7 +33,7 @@ docker compose up -d
 | `npm run build` | Production build |
 | `npm run lint` | ESLint |
 | `npm run test` | Vitest (unit + integration) |
-| `npm run test:e2e` | Playwright E2E tests |
+| `npm run test:e2e` | Playwright E2E tests (**run locally before tagging a release**) |
 | `make docker-image` | Build & push multi-arch GHCR image |
 
 ## Tech Stack
