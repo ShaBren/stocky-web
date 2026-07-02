@@ -2,6 +2,13 @@
 
 All notable changes to StockyWeb will be documented in this file.
 
+## [0.3.2] - 2026-07-01
+
+### Fixed
+- **Auth**: Prevent infinite redirect loop during app initialization
+  - 401 interceptor now suppresses redirects until `markApiInitialized()` is called
+  - Fixes `GET /auth/me` → 401 → redirect → reload → repeat cycle
+
 ## [0.3.1] - 2026-07-01
 
 ### Fixed
