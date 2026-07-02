@@ -240,59 +240,27 @@ export const healthAPI = {
 
 // Backup API (Admin Only)
 export const backupAPI = {
-  // Create full backup and return metadata
-  createFullBackup: async (): Promise<BackupResponse> => {
-    const response = await api.post('/backup/create/full');
+  // Download a full database backup as a .json.gz file
+  downloadBackup: async (): Promise<Blob> => {
+    const response = await api.get('/backup/download', { responseType: 'blob' });
     return response.data;
   },
 
-  // Create and download full backup as file
-  downloadFullBackup: async (): Promise<Blob> => {
-    const response = await api.post('/backup/create/full/download', {}, {
-      responseType: 'blob'
-    });
-    return response.data;
-  },
-
-  // Import partial backup from base64 data
-  importPartialBackup: async (backupData: string, force = false): Promise<ImportResponse> => {
-    const response = await api.post('/backup/import/partial', {
-      backup_data: backupData,
-      force
-    });
-    return response.data;
-  },
-
-  // Import full backup from base64 data (destructive)
-  importFullBackup: async (backupData: string, force = true): Promise<ImportResponse> => {
-    const response = await api.post('/backup/import/full', {
-      backup_data: backupData,
-      force
-    });
-    return response.data;
-  },
-
-  // Upload and import partial backup from file
-  uploadPartialBackup: async (file: File, force = false): Promise<ImportResponse> => {
+  // Restore from a .json.gz backup file
+  restoreBackup: async (file: File, mode: 'merge' | 'replace' = 'merge', confirm = false): Promise<ImportResponse> => {
     const formData = new FormData();
     formData.append('file', file);
-    if (force) formData.append('force', 'true');
-
-    const response = await api.post('/backup/upload/import/partial', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
+    const response = await api.post(
+      `/backup/restore?mode=${mode}&confirm=${confirm}`,
+      formData,
+      { headers: { 'Content-Type': 'multipart/form-data' } },
+    );
     return response.data;
   },
 
-  // Upload and import full backup from file (destructive)
-  uploadFullBackup: async (file: File, force = true): Promise<ImportResponse> => {
-    const formData = new FormData();
-    formData.append('file', file);
-    if (force) formData.append('force', 'true');
-
-    const response = await api.post('/backup/upload/import/full', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
+  // Get database status (table counts)
+  getStatus: async (): Promise<{ tables: Record<string, number>; database_url: string; timestamp: string }> => {
+    const response = await api.get('/backup/status');
     return response.data;
-  }
+  },
 };
