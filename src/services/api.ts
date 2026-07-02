@@ -12,7 +12,6 @@ import type {
   ItemFilter,
   SKUFilter,
   LocationFilter,
-  BackupResponse,
   ImportResponse
 } from '../types/api';
 
