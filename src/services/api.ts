@@ -27,11 +27,6 @@ export const authAPI = {
     return response.data;
   },
 
-  refresh: async (): Promise<LoginResponse> => {
-    const response = await api.post('/auth/refresh');
-    return response.data;
-  },
-
   logout: async (): Promise<void> => {
     await api.post('/auth/logout');
   },
@@ -41,7 +36,14 @@ export const authAPI = {
     return response.data;
   },
 
-  updateProfile: async (userId: number, data: Partial<User & { current_password?: string; new_password?: string }>): Promise<User> => {
+  changePassword: async (currentPassword: string, newPassword: string): Promise<void> => {
+    await api.post('/auth/change-password', {
+      current_password: currentPassword,
+      new_password: newPassword,
+    });
+  },
+
+  updateProfile: async (userId: number, data: Partial<User>): Promise<User> => {
     const response = await api.put(`/users/${userId}`, data);
     return response.data;
   }

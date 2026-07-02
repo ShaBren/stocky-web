@@ -5,7 +5,7 @@ import { parseValidationErrors, getGeneralErrorMessage } from '../utils/errorHan
 import { usePageTitle } from '../utils/usePageTitle';
 
 interface LoginPageProps {
-  onLogin: (token: string) => void;
+  onLogin: () => void;
 }
 
 export default function LoginPage({ onLogin }: LoginPageProps) {
@@ -23,8 +23,8 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
     setErrors([]);
 
     try {
-      const response = await authAPI.login({ username, password, remember_me: rememberMe });
-      onLogin(response.access_token);
+      await authAPI.login({ username, password, remember_me: rememberMe });
+      onLogin();
     } catch (err: unknown) {
       const validationErrors = parseValidationErrors(err);
       if (validationErrors.length === 0) {

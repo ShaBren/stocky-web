@@ -98,12 +98,9 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-  access_token: string;
-  token_type: string;
-  expires_in: number;
   user_id: number;
-  role: 'ADMIN' | 'MEMBER';
-  refresh_token: string;
+  username: string;
+  role: string;
 }
 
 export interface PaginatedResponse<T> {

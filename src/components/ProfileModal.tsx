@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { authAPI } from '../services/api';
 import { ErrorDisplay } from './ErrorDisplay';
 import { parseValidationErrors } from '../utils/errorHandling';
@@ -30,25 +30,12 @@ export function ProfileModal({ user, isOpen, onClose }: ProfileModalProps) {
   const [formErrors, setFormErrors] = useState<string[]>([]);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
 
-  const updateProfileMutation = useMutation({
-    mutationFn: (data: Partial<ProfileFormData>) => authAPI.updateProfile(user.id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['auth', 'me'] });
-      setFormErrors([]);
-      onClose();
-    },
-    onError: (error) => {
-      const validationErrors = parseValidationErrors(error);
-      setFormErrors(validationErrors);
-    }
-  });
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormErrors([]);
 
@@ -68,17 +55,22 @@ export function ProfileModal({ user, isOpen, onClose }: ProfileModalProps) {
       }
     }
 
-    // Prepare data to send
-    const updateData: Partial<ProfileFormData> = {
-      email: formData.email,
-    };
-
-    if (isChangingPassword) {
-      updateData.current_password = formData.current_password;
-      updateData.new_password = formData.new_password;
+    try {
+      // Update email if changed
+      if (formData.email !== user.email) {
+        await authAPI.updateProfile(user.id, { email: formData.email });
+      }
+      // Change password if requested
+      if (isChangingPassword) {
+        await authAPI.changePassword(formData.current_password, formData.new_password);
+      }
+      queryClient.invalidateQueries({ queryKey: ['auth', 'me'] });
+      setFormErrors([]);
+      onClose();
+    } catch (error) {
+      const validationErrors = parseValidationErrors(error);
+      setFormErrors(validationErrors.length > 0 ? validationErrors : ['Failed to update profile']);
     }
-
-    updateProfileMutation.mutate(updateData);
   };
 
   const resetForm = () => {

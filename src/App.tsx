@@ -1,7 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
-import { jwtDecode } from 'jwt-decode';
 import { Layout } from './components/Layout';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
@@ -16,11 +15,10 @@ import AdminPage from './pages/AdminPage';
 import { ShoppingListsPage } from './pages/ShoppingListsPage';
 import { ShoppingListDetailPage } from './pages/ShoppingListDetailPage';
 import { APIDebugPage } from './pages/APIDebugPage';
-import { setAuthToken, initializeApi } from './lib/api';
+import { initializeApi } from './lib/api';
 import { loadRuntimeConfig } from './lib/runtime-config';
 import { authAPI } from './services/api';
 
-// Create a client
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -35,37 +33,18 @@ function App() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    // Load runtime configuration first, then initialize app
     const initializeApp = async () => {
       try {
-        // Load runtime configuration
         await loadRuntimeConfig();
-        
-        // Initialize API client with runtime config
         initializeApi();
-        
-        // Check for existing token
-        const token = localStorage.getItem('stocky_auth_token');
-        if (token) {
-          try {
-            const decoded = jwtDecode<{ exp: number }>(token);
-            const currentTime = Date.now() / 1000;
-            
-            // Check if token is still valid (not expired)
-            if (decoded.exp > currentTime) {
-              setAuthToken(token);
-              setIsAuthenticated(true);
-              
-              // Set up periodic token refresh
-              setupTokenRefresh(decoded.exp);
-            } else {
-              // Token is expired, remove it
-              localStorage.removeItem('stocky_auth_token');
-            }
-          } catch {
-            // Invalid token, remove it
-            localStorage.removeItem('stocky_auth_token');
-          }
+
+        // Check if we have a valid session by calling /auth/me
+        try {
+          await authAPI.getCurrentUser();
+          setIsAuthenticated(true);
+        } catch {
+          // No valid session — stay on login page
+          setIsAuthenticated(false);
         }
       } catch (error) {
         console.error('Failed to initialize app:', error);
@@ -75,64 +54,18 @@ function App() {
     };
 
     initializeApp();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Set up automatic token refresh
-  const setupTokenRefresh = (expiration: number) => {
-    const currentTime = Date.now() / 1000;
-    const timeUntilRefresh = (expiration - currentTime - 600) * 1000; // Refresh 10 minutes before expiry (optimized for 30-minute tokens)
-    
-    if (timeUntilRefresh > 0) {
-      const refreshTime = new Date(Date.now() + timeUntilRefresh);
-      console.log(`🔄 Token refresh scheduled for: ${refreshTime.toLocaleTimeString()} (in ${Math.round(timeUntilRefresh / 1000 / 60)} minutes)`);
-    
-      setTimeout(async () => {
-        try {
-          const response = await authAPI.refresh();
-          setAuthToken(response.access_token);
-          
-          // Set up next refresh
-          const newDecoded = jwtDecode<{ exp: number }>(response.access_token);
-          setupTokenRefresh(newDecoded.exp);
-        } catch (error: unknown) {
-          console.warn('Token refresh failed:', error);
-          // If it's a 404, the backend doesn't support refresh
-          const axiosError = error as { response?: { status?: number } };
-          if (axiosError.response?.status === 404) {
-            console.info('Token refresh not supported by backend');
-            return;
-          }
-          handleLogout();
-        }
-      }, timeUntilRefresh);
-    }
-  };
-
-  const handleLogin = (token: string) => {
-    setAuthToken(token);
+  const handleLogin = () => {
     setIsAuthenticated(true);
-    
-    // Set up automatic refresh for the new token
-    try {
-      const decoded = jwtDecode<{ exp: number }>(token);
-      setupTokenRefresh(decoded.exp);
-    } catch (error) {
-      console.warn('Failed to decode token for refresh setup:', error);
-    }
   };
 
   const handleLogout = async () => {
     try {
-      // Call backend logout to clear HTTP-only cookies
       await authAPI.logout();
     } catch (error) {
       console.warn('Backend logout failed:', error);
-      // Continue with client-side logout even if backend call fails
     }
-    
-    // Clear client-side tokens and state
-    setAuthToken(null);
     setIsAuthenticated(false);
   };
 
