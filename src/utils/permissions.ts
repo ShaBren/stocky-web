@@ -1,6 +1,6 @@
 // Permission management utilities for role-based access control
 
-export type UserRole = 'ADMIN' | 'MEMBER';
+export type UserRole = 'ADMIN' | 'MEMBER' | 'SCANNER' | 'READ_ONLY';
 
 // Permission definitions for each role
 export const ROLE_PERMISSIONS = {
@@ -47,6 +47,50 @@ export const ROLE_PERMISSIONS = {
     canDelete: true,
     canManageUsers: false,
     canChangeOwnProfile: true,
+    canBackupData: false,
+    canRestoreData: false,
+  },
+  SCANNER: {
+    canAccessUsers: false,
+    canAccessInventory: true,
+    canAccessItems: true,
+    canAccessLocations: true,
+    canAccessScanner: true,
+    canAccessAlerts: false,
+    canAccessDashboard: true,
+    canAccessAdmin: false,
+    canAccessBulkMove: false,
+    canAccessShoppingLists: false,
+    canCreateShoppingLists: false,
+    canEditAnyShoppingList: false,
+    canDeleteAnyShoppingList: false,
+    canCreate: false,
+    canEdit: false,
+    canDelete: false,
+    canManageUsers: false,
+    canChangeOwnProfile: false,
+    canBackupData: false,
+    canRestoreData: false,
+  },
+  READ_ONLY: {
+    canAccessUsers: false,
+    canAccessInventory: true,
+    canAccessItems: true,
+    canAccessLocations: true,
+    canAccessScanner: false,
+    canAccessAlerts: true,
+    canAccessDashboard: true,
+    canAccessAdmin: false,
+    canAccessBulkMove: false,
+    canAccessShoppingLists: true,
+    canCreateShoppingLists: false,
+    canEditAnyShoppingList: false,
+    canDeleteAnyShoppingList: false,
+    canCreate: false,
+    canEdit: false,
+    canDelete: false,
+    canManageUsers: false,
+    canChangeOwnProfile: false,
     canBackupData: false,
     canRestoreData: false,
   },

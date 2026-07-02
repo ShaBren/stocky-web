@@ -20,7 +20,7 @@ import {
 interface UserFormData {
   username: string;
   email: string;
-  role: 'ADMIN' | 'MEMBER';
+  role: string;
   password?: string;
 }
 
@@ -459,6 +459,8 @@ export default function UsersPage() {
                     >
                       <option value="MEMBER">Member</option>
                       <option value="ADMIN">Admin</option>
+                      <option value="SCANNER">Scanner</option>
+                      <option value="READ_ONLY">Read Only</option>
                     </select>
                   </div>
                   <div>

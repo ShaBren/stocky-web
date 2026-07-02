@@ -3,7 +3,7 @@ export interface User {
   id: number;
   username: string;
   email: string;
-  role: 'ADMIN' | 'MEMBER';
+  role: 'ADMIN' | 'MEMBER' | 'SCANNER' | 'READ_ONLY';
   is_active: boolean;
   created_at: string;
   updated_at: string;
