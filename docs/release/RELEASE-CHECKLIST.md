@@ -17,9 +17,9 @@
 
 ### Docker & Deployment
 - [x] **Dockerfile**: Multi-stage build configuration created
-- [x] **nginx.conf**: Production web server configuration
+- [x] **nginx/nginx.conf**: Production web server configuration
 - [x] **docker-compose.yml**: Development and production configs
-- [x] **Build Scripts**: Automated build and release scripts
+- [x] **Scripts**: Automated build and release scripts
 - [x] **.dockerignore**: Optimized Docker build context
 
 ### Security & Production Readiness

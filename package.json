@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
+    "docs:api": "node scripts/generate-api-docs.js",
     "docker:build": "docker build -t stocky-web:latest .",
     "docker:run": "docker run -p 3000:80 stocky-web:latest",
     "docker:dev": "docker-compose up --build",

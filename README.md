@@ -2,6 +2,13 @@
 
 A modern React TypeScript frontend for the [Stocky Backend](https://github.com/ShaBren/stocky-backend) — a home kitchen inventory management system.
 
+## Documentation
+
+- **[Architecture & Design](docs/architecture/)** - Project architecture, component diagrams, and design decisions
+- **[Deployment](docs/deployment/)** - Docker and production deployment guides
+- **[Testing](docs/testing/)** - Testing strategies and guides
+- **[Release Notes](docs/release/)** - Changelog and release notes
+
 ## Quick Start
 
 ```bash

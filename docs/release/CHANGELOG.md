@@ -2,6 +2,9 @@
 
 All notable changes to StockyWeb will be documented in this file.
 
+See the [main README](../../README.md) for project overview and quick start.
+
+
 ## [0.3.2] - 2026-07-01
 
 ### Fixed

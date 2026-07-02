@@ -63,7 +63,7 @@ npm run dev
 npm run docker:build
 
 # Full release build with validation
-./scripts/build-release.sh stocky-web:0.0.1
+/scripts/build-release.sh stocky-web:0.0.1
 ```
 
 ### Docker Compose
